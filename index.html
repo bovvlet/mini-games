@@ -6,16 +6,16 @@
 <title>Mini Games</title>
 <style>
   :root {
-    --bg: #0f172a;
+    --bg:    #0f172a;
     --panel: #1e293b;
-    --line: #334155;
-    --x: #38bdf8;
-    --o: #f472b6;
-    --p1: #ef4444;
-    --p2: #fbbf24;
-    --text: #e2e8f0;
+    --line:  #334155;
+    --x:     #38bdf8;
+    --o:     #f472b6;
+    --p1:    #ef4444;
+    --p2:    #fbbf24;
+    --text:  #e2e8f0;
     --muted: #94a3b8;
-    --accent: #22c55e;
+    --accent:#22c55e;
   }
 
   * { box-sizing: border-box; }
@@ -23,26 +23,21 @@
   body {
     margin: 0;
     min-height: 100vh;
+    padding: 32px 16px 48px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 24px;
-    padding: 24px;
+    gap: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
   }
 
-  h1 { margin: 0; font-weight: 600; letter-spacing: 1px; }
-  h2 { margin: 0; font-weight: 500; color: var(--muted); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
-
-  .screen { display: none; flex-direction: column; align-items: center; gap: 24px; }
+  /* ── Screens ── */
+  .screen { display: none; flex-direction: column; align-items: center; gap: 24px; width: 100%; }
   .screen.active { display: flex; }
 
-  .status { font-size: 1.1rem; color: var(--muted); height: 1.5rem; }
-  .status.win { color: var(--accent); font-weight: 600; }
-
+  /* ── Shared buttons ── */
   .btn {
     background: var(--panel);
     color: var(--text);
@@ -52,25 +47,148 @@
     font-size: 1rem;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.15s ease;
+    transition: background 0.15s;
   }
-  .btn:hover { background: #2a3a52; }
-  .btn.primary { border-color: var(--x); }
+  .btn:hover { background: #253347; }
 
-  .menu-section {
+  .back-btn {
+    align-self: flex-start;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+  .back-btn:hover { color: var(--text); }
+
+  .play-btn {
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .play-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+  .controls { display: flex; gap: 8px; }
+
+  /* ── Menu / Catalog ── */
+  #game-catalog {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .game-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    width: 100%;
+  }
+  .game-card:hover { background: #253347; border-color: #4a6fa5; transform: translateY(-2px); }
+  .game-card-icon { width: 52px; height: 52px; flex-shrink: 0; }
+  .game-card-name { font-size: 1.1rem; font-weight: 600; }
+
+  /* ── Detail page ── */
+  .detail-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-width: 480px;
+    width: 100%;
+  }
+  .detail-top { display: flex; align-items: center; gap: 18px; }
+  .detail-icon { width: 72px; height: 72px; flex-shrink: 0; }
+  .detail-meta { display: flex; flex-direction: column; gap: 8px; }
+  .detail-title { font-size: 1.8rem; font-weight: 700; margin: 0; }
+  .detail-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.75rem;
+    background: var(--line);
+    color: var(--muted);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .detail-desc { color: var(--muted); line-height: 1.65; margin: 0; font-size: 0.95rem; }
+
+  .screenshots { display: flex; gap: 12px; width: 100%; }
+  .screenshot {
+    flex: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .screenshot svg { display: block; width: 100%; height: auto; }
+
+  /* ── Config page ── */
+  .config-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .config-wrap h1 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+  .size-options { display: flex; gap: 12px; }
+  .size-card {
+    flex: 1;
+    background: var(--panel);
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 20px 32px;
-    min-width: 280px;
+    gap: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
   }
-  .menu-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .size-card:hover { background: #253347; border-color: var(--x); transform: translateY(-2px); }
+  .size-preview {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background-image: radial-gradient(circle, var(--muted) 1.2px, transparent 1.2px);
+  }
+  .size-preview[data-size="10"] { background-size: 9px 9px; }
+  .size-preview[data-size="15"] { background-size: 6px 6px; }
+  .size-preview[data-size="20"] { background-size: 4.5px 4.5px; }
+  .size-label { font-size: 0.95rem; font-weight: 600; }
+  .size-dim   { font-size: 0.8rem; color: var(--muted); }
 
-  /* Tic-Tac-Toe */
+  /* ── Status / common ── */
+  .status { font-size: 1.1rem; color: var(--muted); height: 1.5rem; }
+  .status.win { color: var(--accent); font-weight: 600; }
+  h1.page-title { margin: 0; font-size: 1.6rem; font-weight: 700; }
+
+  /* ── Tic-Tac-Toe board ── */
   #ttt-board {
     display: grid;
     grid-template-columns: repeat(3, 100px);
@@ -84,36 +202,23 @@
     background: var(--panel);
     border: none;
     border-radius: 8px;
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--text);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s ease, transform 0.05s ease;
+    transition: background 0.15s, transform 0.05s;
     font-family: inherit;
   }
   .ttt-cell:hover:not(:disabled) { background: #2a3a52; }
   .ttt-cell:active:not(:disabled) { transform: scale(0.97); }
   .ttt-cell:disabled { cursor: default; }
-  .ttt-cell.x { color: var(--x); }
-  .ttt-cell.o { color: var(--o); }
   .ttt-cell.win { background: #14532d; }
 
-  /* SVG draw-on animation */
+  /* TTT draw-on animation */
   .ttt-cell svg { width: 68%; height: 68%; overflow: visible; pointer-events: none; }
-  .ttt-stroke   { fill: none; stroke-linecap: round; stroke-width: 10; }
-  .ttt-x-s1, .ttt-x-s2 {
-    stroke: var(--x);
-    stroke-dasharray: 91;
-    stroke-dashoffset: 91;
-  }
-  .ttt-o-s1 {
-    stroke: var(--o);
-    stroke-dasharray: 214;
-    stroke-dashoffset: 214;
-  }
+  .ttt-stroke { fill: none; stroke-linecap: round; stroke-width: 10; }
+  .ttt-x-s1, .ttt-x-s2 { stroke: var(--x); stroke-dasharray: 91; stroke-dashoffset: 91; }
+  .ttt-o-s1 { stroke: var(--o); stroke-dasharray: 214; stroke-dashoffset: 214; }
   .ttt-x-s1 { animation: ttt-draw-x 0.13s ease-out both; }
   .ttt-x-s2 { animation: ttt-draw-x 0.13s ease-out 0.10s both; }
   .ttt-o-s1 { animation: ttt-draw-o 0.18s ease-out both; }
@@ -127,7 +232,7 @@
     to   { stroke-dashoffset: 0;   }
   }
 
-  /* Win strike-through line */
+  /* TTT win strike line */
   #ttt-board-wrap { position: relative; }
   #ttt-line-svg {
     position: absolute;
@@ -136,7 +241,7 @@
     pointer-events: none;
   }
 
-  /* Connect Four */
+  /* ── Connect Four board ── */
   #c4-board {
     display: grid;
     gap: 3px;
@@ -150,12 +255,12 @@
     border-radius: 50%;
     cursor: pointer;
     padding: 0;
-    transition: background 0.1s ease;
+    transition: background 0.1s;
   }
   .c4-cell:hover:not(:disabled) { background: #2a3a52; }
   .c4-cell:disabled { cursor: default; }
-  .c4-cell.p1 { background: var(--p1); }
-  .c4-cell.p2 { background: var(--p2); }
+  .c4-cell.p1  { background: var(--p1); }
+  .c4-cell.p2  { background: var(--p2); }
   .c4-cell.win { box-shadow: 0 0 0 3px var(--accent) inset; }
 
   @keyframes c4-fall {
@@ -166,29 +271,20 @@
     100% { transform: translateY(0); }
   }
 
-  .controls { display: flex; gap: 8px; }
-
-  /* Win overlay */
+  /* ── Win overlay ── */
   #win-overlay {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     display: none;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.65);
+    background: rgba(0,0,0,0.65);
     z-index: 100;
   }
   #win-overlay.active { display: flex; }
-
-  #confetti-canvas {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
+  #confetti-canvas { position: absolute; inset: 0; pointer-events: none; }
 
   .win-card {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 20px;
@@ -200,26 +296,14 @@
     gap: 20px;
     animation: pop-in 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-
-  .win-trophy {
-    font-size: 5rem;
-    line-height: 1;
-    animation: trophy-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  #win-text {
-    font-size: 2.2rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-
+  .win-trophy { font-size: 5rem; line-height: 1; animation: trophy-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  #win-text { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.5px; }
   .win-buttons { display: flex; gap: 10px; }
 
   @keyframes pop-in {
     from { transform: scale(0.4) translateY(40px); opacity: 0; }
-    to   { transform: scale(1) translateY(0);      opacity: 1; }
+    to   { transform: scale(1)   translateY(0);    opacity: 1; }
   }
-
   @keyframes trophy-in {
     0%   { transform: scale(0) rotate(-200deg); opacity: 0; }
     70%  { transform: scale(1.25) rotate(15deg); }
@@ -229,26 +313,275 @@
 </head>
 <body>
 
-<!-- MENU -->
+<!-- ═══ MENU (catalog) ═══ -->
 <div id="menu" class="screen active">
-  <h1>Mini Games</h1>
-  <div class="menu-section">
-    <h2>Tic-Tac-Toe</h2>
-    <button class="btn primary" data-action="ttt-start">Play</button>
+  <h1 class="page-title">Mini Games</h1>
+  <div id="game-catalog">
+
+    <button class="game-card" data-action="go-ttt-detail">
+      <svg class="game-card-icon" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- grid lines -->
+        <line x1="19" y1="3"  x2="19" y2="53" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="37" y1="3"  x2="37" y2="53" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="3"  y1="19" x2="53" y2="19" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="3"  y1="37" x2="53" y2="37" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- X top-left (center 10,10) -->
+        <line x1="4"  y1="4"  x2="16" y2="16" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+        <line x1="16" y1="4"  x2="4"  y2="16" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+        <!-- O center (center 28,28) -->
+        <circle cx="28" cy="28" r="7" fill="none" stroke="#f472b6" stroke-width="3"/>
+        <!-- X bottom-right (center 46,46) -->
+        <line x1="40" y1="40" x2="52" y2="52" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+        <line x1="52" y1="40" x2="40" y2="52" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <span class="game-card-name">Tic-Tac-Toe</span>
+    </button>
+
+    <button class="game-card" data-action="go-c4-detail">
+      <svg class="game-card-icon" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 4 bottom circles (the "4 in a row") -->
+        <circle cx="7"  cy="49" r="5" fill="#ef4444"/>
+        <circle cx="21" cy="49" r="5" fill="#fbbf24"/>
+        <circle cx="35" cy="49" r="5" fill="#ef4444"/>
+        <circle cx="49" cy="49" r="5" fill="#fbbf24"/>
+        <!-- highlight bar under 4 in a row -->
+        <!-- row above -->
+        <circle cx="7"  cy="35" r="5" fill="#fbbf24"/>
+        <circle cx="21" cy="35" r="5" fill="#ef4444"/>
+        <circle cx="35" cy="35" r="5" fill="#fbbf24" opacity="0.5"/>
+        <circle cx="49" cy="35" r="5" fill="#334155"/>
+        <!-- top row, partial -->
+        <circle cx="7"  cy="21" r="5" fill="#ef4444" opacity="0.6"/>
+        <circle cx="21" cy="21" r="5" fill="#334155"/>
+        <circle cx="35" cy="21" r="5" fill="#334155"/>
+        <circle cx="49" cy="21" r="5" fill="#334155"/>
+        <!-- glow on bottom 4 -->
+        <circle cx="7"  cy="49" r="5" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.5"/>
+        <circle cx="21" cy="49" r="5" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
+        <circle cx="35" cy="49" r="5" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.5"/>
+        <circle cx="49" cy="49" r="5" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
+      </svg>
+      <span class="game-card-name">4 in a Row</span>
+    </button>
+
   </div>
-  <div class="menu-section">
-    <h2>4 in a Row</h2>
-    <div class="menu-row">
-      <button class="btn" data-action="c4-start" data-size="10">Small 10×10</button>
-      <button class="btn" data-action="c4-start" data-size="15">Medium 15×15</button>
-      <button class="btn" data-action="c4-start" data-size="20">Big 20×20</button>
+</div>
+
+<!-- ═══ TTT DETAIL ═══ -->
+<div id="ttt-detail" class="screen">
+  <div class="detail-wrap">
+    <button class="back-btn" data-action="menu">&#8592; Back</button>
+    <div class="detail-top">
+      <svg class="detail-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="18" fill="#1e293b"/>
+        <line x1="27" y1="8"  x2="27" y2="72" stroke="#334155" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="53" y1="8"  x2="53" y2="72" stroke="#334155" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="8"  y1="27" x2="72" y2="27" stroke="#334155" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="8"  y1="53" x2="72" y2="53" stroke="#334155" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="12" y1="12" x2="22" y2="22" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+        <line x1="22" y1="12" x2="12" y2="22" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="10" fill="none" stroke="#f472b6" stroke-width="4"/>
+        <line x1="58" y1="58" x2="68" y2="68" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+        <line x1="68" y1="58" x2="58" y2="68" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <div class="detail-meta">
+        <h1 class="detail-title">Tic-Tac-Toe</h1>
+        <div class="detail-tags">
+          <span class="tag">2 Players</span>
+          <span class="tag">Strategy</span>
+          <span class="tag">Classic</span>
+        </div>
+      </div>
+    </div>
+    <p class="detail-desc">Take turns placing X and O on a 3×3 grid. Get three of your marks in a row — horizontally, vertically, or diagonally — to win. Simple to learn, endlessly strategic.</p>
+    <div class="screenshots">
+      <!-- Screenshot 1: mid-game -->
+      <div class="screenshot">
+        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+          <rect width="180" height="180" fill="#0f172a"/>
+          <!-- grid -->
+          <line x1="62" y1="8"  x2="62" y2="172" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <line x1="118" y1="8" x2="118" y2="172" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <line x1="8"  y1="62"  x2="172" y2="62"  stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <line x1="8"  y1="118" x2="172" y2="118" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <!-- X at 0,0 (center 34,34) -->
+          <line x1="18" y1="18" x2="50" y2="50" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <line x1="50" y1="18" x2="18" y2="50" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <!-- O at 0,1 (center 90,34) -->
+          <circle cx="90" cy="34" r="20" fill="none" stroke="#f472b6" stroke-width="6"/>
+          <!-- X at 1,1 (center 90,90) -->
+          <line x1="74" y1="74" x2="106" y2="106" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <line x1="106" y1="74" x2="74" y2="106" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <!-- O at 1,2 (center 146,90) -->
+          <circle cx="146" cy="90" r="20" fill="none" stroke="#f472b6" stroke-width="6"/>
+          <!-- X at 2,0 (center 34,146) -->
+          <line x1="18" y1="130" x2="50" y2="162" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <line x1="50" y1="130" x2="18" y2="162" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- Screenshot 2: X wins with strike line -->
+      <div class="screenshot">
+        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+          <rect width="180" height="180" fill="#0f172a"/>
+          <line x1="62" y1="8"  x2="62" y2="172" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <line x1="118" y1="8" x2="118" y2="172" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <line x1="8"  y1="62"  x2="172" y2="62"  stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <line x1="8"  y1="118" x2="172" y2="118" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+          <!-- win cells highlighted -->
+          <rect x="4"   y="4"   width="54" height="54" rx="6" fill="#14532d"/>
+          <rect x="66"  y="66"  width="54" height="54" rx="6" fill="#14532d"/>
+          <rect x="122" y="122" width="54" height="54" rx="6" fill="#14532d"/>
+          <!-- X at 0,0 -->
+          <line x1="18" y1="18" x2="50" y2="50" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <line x1="50" y1="18" x2="18" y2="50" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <!-- O at 0,1 -->
+          <circle cx="90" cy="34" r="20" fill="none" stroke="#f472b6" stroke-width="6"/>
+          <!-- O at 1,0 -->
+          <circle cx="34" cy="90" r="20" fill="none" stroke="#f472b6" stroke-width="6"/>
+          <!-- X at 1,1 -->
+          <line x1="74" y1="74" x2="106" y2="106" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <line x1="106" y1="74" x2="74" y2="106" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <!-- X at 2,2 -->
+          <line x1="130" y1="130" x2="162" y2="162" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <line x1="162" y1="130" x2="130" y2="162" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+          <!-- win strike line diagonal with glow -->
+          <defs><filter id="glow-ttt"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <line x1="34" y1="34" x2="146" y2="146" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" filter="url(#glow-ttt)"/>
+        </svg>
+      </div>
+    </div>
+    <button class="play-btn" data-action="ttt-start">Play</button>
+  </div>
+</div>
+
+<!-- ═══ C4 DETAIL ═══ -->
+<div id="c4-detail" class="screen">
+  <div class="detail-wrap">
+    <button class="back-btn" data-action="menu">&#8592; Back</button>
+    <div class="detail-top">
+      <svg class="detail-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="18" fill="#1e293b"/>
+        <circle cx="14" cy="66" r="8" fill="#ef4444"/>
+        <circle cx="32" cy="66" r="8" fill="#fbbf24"/>
+        <circle cx="50" cy="66" r="8" fill="#ef4444"/>
+        <circle cx="68" cy="66" r="8" fill="#fbbf24"/>
+        <circle cx="14" cy="46" r="8" fill="#fbbf24"/>
+        <circle cx="32" cy="46" r="8" fill="#ef4444"/>
+        <circle cx="14" cy="26" r="8" fill="#ef4444" opacity="0.7"/>
+        <circle cx="50" cy="46" r="8" fill="#334155"/>
+        <circle cx="68" cy="46" r="8" fill="#334155"/>
+      </svg>
+      <div class="detail-meta">
+        <h1 class="detail-title">4 in a Row</h1>
+        <div class="detail-tags">
+          <span class="tag">2 Players</span>
+          <span class="tag">Strategy</span>
+          <span class="tag">3 Sizes</span>
+        </div>
+      </div>
+    </div>
+    <p class="detail-desc">Drop colored discs into the grid — they fall to the lowest empty row. Be the first to connect 4 in a row horizontally, vertically, or diagonally. Available in small, medium, and big grids.</p>
+    <div class="screenshots">
+      <!-- Screenshot 1: game in progress -->
+      <div class="screenshot">
+        <svg viewBox="0 0 196 148" xmlns="http://www.w3.org/2000/svg">
+          <rect width="196" height="148" fill="#0f172a"/>
+          <!-- board bg -->
+          <rect x="3" y="3" width="190" height="142" rx="8" fill="#1e293b"/>
+          <!-- empty cells (grid) -->
+          <g fill="#0f172a">
+            <circle cx="17"  cy="17"  r="11"/><circle cx="45"  cy="17"  r="11"/><circle cx="73"  cy="17"  r="11"/>
+            <circle cx="101" cy="17"  r="11"/><circle cx="129" cy="17"  r="11"/><circle cx="157" cy="17"  r="11"/><circle cx="185" cy="17"  r="11"/>
+            <circle cx="17"  cy="45"  r="11"/><circle cx="45"  cy="45"  r="11"/><circle cx="73"  cy="45"  r="11"/>
+            <circle cx="101" cy="45"  r="11"/><circle cx="129" cy="45"  r="11"/><circle cx="157" cy="45"  r="11"/><circle cx="185" cy="45"  r="11"/>
+            <circle cx="17"  cy="73"  r="11"/><circle cx="45"  cy="73"  r="11"/>
+            <circle cx="129" cy="73"  r="11"/><circle cx="157" cy="73"  r="11"/><circle cx="185" cy="73"  r="11"/>
+            <circle cx="17"  cy="101" r="11"/>
+            <circle cx="129" cy="101" r="11"/><circle cx="157" cy="101" r="11"/><circle cx="185" cy="101" r="11"/>
+            <circle cx="157" cy="129" r="11"/><circle cx="185" cy="129" r="11"/>
+          </g>
+          <!-- pieces row4 (y=129): p1,p2,p1,p2,p1 -->
+          <circle cx="17"  cy="129" r="11" fill="#ef4444"/>
+          <circle cx="45"  cy="129" r="11" fill="#fbbf24"/>
+          <circle cx="73"  cy="129" r="11" fill="#ef4444"/>
+          <circle cx="101" cy="129" r="11" fill="#fbbf24"/>
+          <circle cx="129" cy="129" r="11" fill="#ef4444"/>
+          <!-- pieces row3 (y=101): p2,p1,p2,p1 -->
+          <circle cx="45"  cy="101" r="11" fill="#fbbf24"/>
+          <circle cx="73"  cy="101" r="11" fill="#ef4444"/>
+          <circle cx="101" cy="101" r="11" fill="#fbbf24"/>
+          <!-- pieces row2 (y=73): p1,p2 -->
+          <circle cx="73"  cy="73"  r="11" fill="#ef4444"/>
+          <circle cx="101" cy="73"  r="11" fill="#fbbf24"/>
+        </svg>
+      </div>
+      <!-- Screenshot 2: 4-in-a-row win -->
+      <div class="screenshot">
+        <svg viewBox="0 0 196 148" xmlns="http://www.w3.org/2000/svg">
+          <rect width="196" height="148" fill="#0f172a"/>
+          <rect x="3" y="3" width="190" height="142" rx="8" fill="#1e293b"/>
+          <defs><filter id="glow-c4"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <!-- empty cells -->
+          <g fill="#0f172a">
+            <circle cx="17" cy="17"  r="11"/><circle cx="45" cy="17"  r="11"/><circle cx="73" cy="17"  r="11"/>
+            <circle cx="101" cy="17" r="11"/><circle cx="129" cy="17" r="11"/><circle cx="157" cy="17" r="11"/><circle cx="185" cy="17" r="11"/>
+            <circle cx="17" cy="45"  r="11"/><circle cx="45" cy="45"  r="11"/><circle cx="73" cy="45"  r="11"/>
+            <circle cx="101" cy="45" r="11"/><circle cx="129" cy="45" r="11"/><circle cx="157" cy="45" r="11"/><circle cx="185" cy="45" r="11"/>
+            <circle cx="17" cy="73"  r="11"/>
+            <circle cx="129" cy="73" r="11"/><circle cx="157" cy="73" r="11"/><circle cx="185" cy="73" r="11"/>
+            <circle cx="17" cy="101" r="11"/><circle cx="157" cy="101" r="11"/><circle cx="185" cy="101" r="11"/>
+            <circle cx="17" cy="129" r="11"/><circle cx="157" cy="129" r="11"/><circle cx="185" cy="129" r="11"/>
+          </g>
+          <!-- support pieces -->
+          <circle cx="45"  cy="73"  r="11" fill="#ef4444"/>
+          <circle cx="73"  cy="73"  r="11" fill="#fbbf24"/>
+          <circle cx="45"  cy="101" r="11" fill="#fbbf24"/>
+          <circle cx="73"  cy="101" r="11" fill="#ef4444"/>
+          <circle cx="101" cy="101" r="11" fill="#fbbf24"/>
+          <circle cx="45"  cy="129" r="11" fill="#ef4444"/>
+          <circle cx="73"  cy="129" r="11" fill="#ef4444"/>
+          <circle cx="101" cy="129" r="11" fill="#fbbf24"/>
+          <circle cx="129" cy="129" r="11" fill="#ef4444"/>
+          <!-- 4-in-a-row: yellow at row1 cols 1-4 (y=45) with glow -->
+          <circle cx="45"  cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+          <circle cx="73"  cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+          <circle cx="101" cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+          <circle cx="129" cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+        </svg>
+      </div>
+    </div>
+    <button class="play-btn" data-action="go-c4-config">Play</button>
+  </div>
+</div>
+
+<!-- ═══ C4 CONFIG ═══ -->
+<div id="c4-config" class="screen">
+  <div class="config-wrap">
+    <button class="back-btn" data-action="go-c4-detail">&#8592; Back</button>
+    <h1>Choose Grid Size</h1>
+    <div class="size-options">
+      <button class="size-card" data-action="c4-start" data-size="10">
+        <div class="size-preview" data-size="10"></div>
+        <span class="size-label">Small</span>
+        <span class="size-dim">10 × 10</span>
+      </button>
+      <button class="size-card" data-action="c4-start" data-size="15">
+        <div class="size-preview" data-size="15"></div>
+        <span class="size-label">Medium</span>
+        <span class="size-dim">15 × 15</span>
+      </button>
+      <button class="size-card" data-action="c4-start" data-size="20">
+        <div class="size-preview" data-size="20"></div>
+        <span class="size-label">Big</span>
+        <span class="size-dim">20 × 20</span>
+      </button>
     </div>
   </div>
 </div>
 
-<!-- TIC-TAC-TOE -->
+<!-- ═══ TIC-TAC-TOE GAME ═══ -->
 <div id="ttt" class="screen">
-  <h1>Tic-Tac-Toe</h1>
+  <h1 class="page-title">Tic-Tac-Toe</h1>
   <div id="ttt-status" class="status">X's turn</div>
   <div id="ttt-board-wrap">
     <div id="ttt-board" role="grid" aria-label="Tic-tac-toe board"></div>
@@ -260,9 +593,9 @@
   </div>
 </div>
 
-<!-- CONNECT FOUR -->
+<!-- ═══ CONNECT FOUR GAME ═══ -->
 <div id="c4" class="screen">
-  <h1>4 in a Row</h1>
+  <h1 class="page-title">4 in a Row</h1>
   <div id="c4-status" class="status">Red's turn</div>
   <div id="c4-board" role="grid" aria-label="Connect four board"></div>
   <div class="controls">
@@ -271,14 +604,14 @@
   </div>
 </div>
 
-<!-- WIN OVERLAY -->
+<!-- ═══ WIN OVERLAY ═══ -->
 <div id="win-overlay">
   <canvas id="confetti-canvas"></canvas>
   <div class="win-card">
     <div class="win-trophy">🏆</div>
     <div id="win-text">Player wins!</div>
     <div class="win-buttons">
-      <button class="btn primary" data-action="play-again">Play Again</button>
+      <button class="btn" style="border-color:var(--x)" data-action="play-again">Play Again</button>
       <button class="btn" data-action="menu">Menu</button>
     </div>
   </div>
@@ -286,31 +619,33 @@
 
 <script src="game-logic.js"></script>
 <script>
-  // ---------- Screens ----------
+  // ── Screens ──
   const screens = {
-    menu: document.getElementById('menu'),
-    ttt: document.getElementById('ttt'),
-    c4: document.getElementById('c4'),
+    menu:         document.getElementById('menu'),
+    'ttt-detail': document.getElementById('ttt-detail'),
+    'c4-detail':  document.getElementById('c4-detail'),
+    'c4-config':  document.getElementById('c4-config'),
+    ttt:          document.getElementById('ttt'),
+    c4:           document.getElementById('c4'),
   };
 
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
     screens[name].classList.add('active');
+    window.scrollTo(0, 0);
   }
 
-  // ---------- Confetti ----------
-  const overlay = document.getElementById('win-overlay');
-  const winText = document.getElementById('win-text');
+  // ── Confetti ──
+  const overlay        = document.getElementById('win-overlay');
+  const winText        = document.getElementById('win-text');
   const confettiCanvas = document.getElementById('confetti-canvas');
-  const ctx = confettiCanvas.getContext('2d');
-  let confettiParticles = [];
-  let confettiAnimId = null;
-  let playAgainCallback = null;
+  const ctx            = confettiCanvas.getContext('2d');
+  let confettiParticles = [], confettiAnimId = null, playAgainCallback = null;
 
   const COLORS = ['#38bdf8','#f472b6','#fbbf24','#22c55e','#a78bfa','#fb923c','#34d399','#f87171'];
 
   function startConfetti() {
-    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.width  = window.innerWidth;
     confettiCanvas.height = window.innerHeight;
     confettiParticles = Array.from({ length: 180 }, () => ({
       x: Math.random() * confettiCanvas.width,
@@ -318,8 +653,7 @@
       vx: (Math.random() - 0.5) * 4,
       vy: 2.5 + Math.random() * 3.5,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      w: 7 + Math.random() * 9,
-      h: 3 + Math.random() * 5,
+      w: 7 + Math.random() * 9, h: 3 + Math.random() * 5,
       rot: Math.random() * Math.PI * 2,
       rotV: (Math.random() - 0.5) * 0.18,
       shape: Math.random() < 0.4 ? 'circle' : 'rect',
@@ -331,25 +665,12 @@
   function loopConfetti() {
     ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
     for (const p of confettiParticles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.rotV;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-      if (p.shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      }
+      p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color;
+      if (p.shape === 'circle') { ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2); ctx.fill(); }
+      else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
       ctx.restore();
-      if (p.y > confettiCanvas.height + 20) {
-        p.y = -20;
-        p.x = Math.random() * confettiCanvas.width;
-      }
+      if (p.y > confettiCanvas.height + 20) { p.y = -20; p.x = Math.random() * confettiCanvas.width; }
     }
     confettiAnimId = requestAnimationFrame(loopConfetti);
   }
@@ -373,7 +694,7 @@
     playAgainCallback = null;
   }
 
-  // Board geometry: padding 6px, cell 100px, gap 6px → cell pitch = 106px
+  // ── TTT helpers ──
   function tttCellCenter(i) {
     const r = Math.floor(i / 3), c = i % 3;
     return [6 + c * 106 + 50, 6 + r * 106 + 50];
@@ -396,12 +717,10 @@
     el.setAttribute('stroke-dashoffset', len);
     el.style.transition = 'stroke-dashoffset 0.28s ease-out';
     svg.appendChild(el);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        el.setAttribute('stroke-dashoffset', '0');
-        setTimeout(onDone, 560); // 280ms draw + 280ms pause
-      });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.setAttribute('stroke-dashoffset', '0');
+      setTimeout(onDone, 560);
+    }));
   }
 
   function tttMarkHTML(mark) {
@@ -409,25 +728,19 @@
       <line class="ttt-stroke ttt-x-s1" x1="18" y1="18" x2="82" y2="82"/>
       <line class="ttt-stroke ttt-x-s2" x1="82" y1="18" x2="18" y2="82"/>
     </svg>`;
-    // O starts at 12-o'clock via rotate(-90)
     return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <circle class="ttt-stroke ttt-o-s1" cx="50" cy="50" r="34" transform="rotate(-90 50 50)"/>
     </svg>`;
   }
 
-  // ---------- Tic-Tac-Toe ----------
-
+  // ── Tic-Tac-Toe ──
   const ttt = {
-    boardEl: document.getElementById('ttt-board'),
+    boardEl:  document.getElementById('ttt-board'),
     statusEl: document.getElementById('ttt-status'),
-    cells: [],
-    state: [],
-    current: 'X',
-    gameOver: false,
+    cells: [], state: [], current: 'X', gameOver: false,
 
     build() {
-      this.boardEl.innerHTML = '';
-      this.cells = [];
+      this.boardEl.innerHTML = ''; this.cells = [];
       for (let i = 0; i < 9; i++) {
         const cell = document.createElement('button');
         cell.className = 'ttt-cell';
@@ -440,22 +753,16 @@
     },
 
     reset() {
-      this.state = Array(9).fill('');
-      this.current = 'X';
-      this.gameOver = false;
-      this.statusEl.textContent = "X's turn";
-      this.statusEl.classList.remove('win');
+      this.state = Array(9).fill(''); this.current = 'X'; this.gameOver = false;
+      this.statusEl.textContent = "X's turn"; this.statusEl.classList.remove('win');
       this.cells.forEach(c => { c.classList.remove('win'); c.innerHTML = ''; });
-      const lineSvg = document.getElementById('ttt-line-svg');
-      lineSvg.innerHTML = ''; lineSvg.style.filter = '';
+      const s = document.getElementById('ttt-line-svg'); s.innerHTML = ''; s.style.filter = '';
       this.render();
     },
 
     render() {
       this.cells.forEach((cell, i) => {
-        if (this.state[i] && cell.innerHTML === '') {
-          cell.innerHTML = tttMarkHTML(this.state[i]);
-        }
+        if (this.state[i] && cell.innerHTML === '') cell.innerHTML = tttMarkHTML(this.state[i]);
         cell.disabled = this.gameOver || this.state[i] !== '';
       });
     },
@@ -484,45 +791,30 @@
     },
   };
 
-  ttt.build();
-  ttt.reset();
+  ttt.build(); ttt.reset();
 
-  // ---------- Connect Four ----------
-
+  // ── Connect Four ──
   const c4 = {
-    boardEl: document.getElementById('c4-board'),
+    boardEl:  document.getElementById('c4-board'),
     statusEl: document.getElementById('c4-status'),
-    size: 10,
-    cells: [],
-    state: [],
-    current: 'p1',
-    gameOver: false,
+    size: 10, cells: [], state: [], current: 'p1', gameOver: false,
 
     label(p) { return p === 'p1' ? 'Red' : 'Yellow'; },
 
-    cellSize() {
-      if (this.size === 10) return 50;
-      if (this.size === 15) return 36;
-      return 28;
-    },
+    cellSize() { return this.size === 10 ? 50 : this.size === 15 ? 36 : 28; },
 
     start(size) {
-      this.size = size;
-      this.state = makeC4Board(size);
-      this.current = 'p1';
-      this.gameOver = false;
-      this.statusEl.textContent = "Red's turn";
-      this.statusEl.classList.remove('win');
-      this.build();
-      this.render();
+      this.size = size; this.state = makeC4Board(size);
+      this.current = 'p1'; this.gameOver = false;
+      this.statusEl.textContent = "Red's turn"; this.statusEl.classList.remove('win');
+      this.build(); this.render();
     },
 
     build() {
       const px = this.cellSize();
       this.boardEl.style.gridTemplateColumns = `repeat(${this.size}, ${px}px)`;
-      this.boardEl.style.gridTemplateRows = `repeat(${this.size}, ${px}px)`;
-      this.boardEl.innerHTML = '';
-      this.cells = [];
+      this.boardEl.style.gridTemplateRows    = `repeat(${this.size}, ${px}px)`;
+      this.boardEl.innerHTML = ''; this.cells = [];
       for (let r = 0; r < this.size; r++) {
         const row = [];
         for (let c = 0; c < this.size; c++) {
@@ -562,8 +854,6 @@
       this.render();
     },
 
-    // All pieces start from 1 cell-height above the board top.
-    // fallFrom = px*(row+1.5) + row*3 + 6  →  constant start Y for all pieces.
     animateDrop(row, col) {
       const px = this.cellSize();
       const fallFrom = Math.round(px * (row + 1.5) + row * 3 + 6);
@@ -571,36 +861,36 @@
       const cell = this.cells[row][col];
       cell.style.setProperty('--fall-from', `-${fallFrom}px`);
       cell.style.animation = 'none';
-      void cell.offsetHeight; // force reflow to restart animation
+      void cell.offsetHeight;
       cell.style.animation = `c4-fall ${duration}s linear both`;
     },
 
     render() {
-      for (let r = 0; r < this.size; r++) {
+      for (let r = 0; r < this.size; r++)
         for (let c = 0; c < this.size; c++) {
-          const cell = this.cells[r][c];
-          const v = this.state[r][c];
-          // Only add class on new placements — removing/re-adding would restart animation
+          const cell = this.cells[r][c], v = this.state[r][c];
           if (v && !cell.classList.contains(v)) cell.classList.add(v);
           cell.disabled = this.gameOver || v !== '';
         }
-      }
     },
 
     reset() { this.start(this.size); },
   };
 
-  // ---------- Navigation ----------
-  document.body.addEventListener('click', (e) => {
+  // ── Navigation ──
+  document.body.addEventListener('click', e => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
     const action = target.dataset.action;
-    if (action === 'menu') { hideWinOverlay(); showScreen('menu'); }
-    else if (action === 'play-again') { const cb = playAgainCallback; hideWinOverlay(); if (cb) cb(); }
-    else if (action === 'ttt-start') { ttt.reset(); showScreen('ttt'); }
-    else if (action === 'ttt-reset') ttt.reset();
-    else if (action === 'c4-start') { c4.start(parseInt(target.dataset.size, 10)); showScreen('c4'); }
-    else if (action === 'c4-reset') c4.reset();
+    if      (action === 'menu')          { hideWinOverlay(); showScreen('menu'); }
+    else if (action === 'play-again')    { const cb = playAgainCallback; hideWinOverlay(); if (cb) cb(); }
+    else if (action === 'go-ttt-detail') showScreen('ttt-detail');
+    else if (action === 'go-c4-detail')  showScreen('c4-detail');
+    else if (action === 'go-c4-config')  showScreen('c4-config');
+    else if (action === 'ttt-start')     { ttt.reset(); showScreen('ttt'); }
+    else if (action === 'ttt-reset')     ttt.reset();
+    else if (action === 'c4-start')      { c4.start(parseInt(target.dataset.size, 10)); showScreen('c4'); }
+    else if (action === 'c4-reset')      c4.reset();
   });
 </script>
 </body>
