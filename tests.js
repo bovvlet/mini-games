@@ -3,8 +3,7 @@
 const assert = require('assert');
 const {
   checkTTTWinner, checkC4WinFrom, c4Drop, isC4BoardFull, makeC4Board,
-  makeDBState, dbDraw, dbIsComplete, dbScore,
-  makeDBTriState, dbTriDraw, dbTriIsComplete, dbTriScore,
+  makeDBCells, makeDBTriCells, makeDBRhombusCells, makeDBFieldState, dbDraw, dbIsComplete, dbScore,
 } = require('./game-logic.js');
 
 let passed = 0, failed = 0;
@@ -271,202 +270,227 @@ test('horizontal win line is exactly columns 0–3 in bottom row', () => {
   assert.deepStrictEqual(sorted, [[4,0],[4,1],[4,2],[4,3]]);
 });
 
-// ─── UNIT TESTS — Dots & Boxes (square) ──────────────────────────────────────
+// ─── UNIT TESTS — Dots & Boxes (cell masks) ──────────────────────────────────
 
-suite('Unit — makeDBState');
+suite('Unit — DB cell masks');
 
-test('borders are pre-drawn', () => {
-  const s = makeDBState(3);
-  // top and bottom rows all drawn
-  for (let c = 0; c < 3; c++) { assert.ok(s.h[0][c]); assert.ok(s.h[3][c]); }
-  // left and right columns all drawn
-  for (let r = 0; r < 3; r++) { assert.ok(s.v[r][0]); assert.ok(s.v[r][3]); }
-  // inner lines not drawn
-  assert.strictEqual(s.h[1][0], false);
-  assert.strictEqual(s.v[0][1], false);
+test('makeDBCells(3) returns 3×3 all-true mask', () => {
+  const cells = makeDBCells(3);
+  assert.strictEqual(cells.length, 3);
+  assert.ok(cells.every(row => row.length === 3 && row.every(v => v === true)));
 });
 
-test('all boxes start null', () => {
-  const s = makeDBState(3);
+test('makeDBTriCells(3): cells[r][c] = (r+c < 3)', () => {
+  const cells = makeDBTriCells(3);
+  assert.strictEqual(cells[0][2], true);  // 0+2=2 < 3
+  assert.strictEqual(cells[1][1], true);  // 1+1=2 < 3
+  assert.strictEqual(cells[1][2], false); // 1+2=3 not < 3
+  assert.strictEqual(cells[2][0], true);  // 2+0=2 < 3
+  assert.strictEqual(cells[2][1], false); // 2+1=3 not < 3
+  const count = cells.flat().filter(Boolean).length;
+  assert.strictEqual(count, 6); // n*(n+1)/2 = 6
+});
+
+test('makeDBRhombusCells(2) returns 3×3 with 5 cells (cross shape)', () => {
+  const cells = makeDBRhombusCells(2);
+  assert.strictEqual(cells.length, 3);
+  assert.ok(cells[1].every(v => v === true)); // center row all true
+  assert.strictEqual(cells[0][0], false);
+  assert.strictEqual(cells[0][1], true);
+  const count = cells.flat().filter(Boolean).length;
+  assert.strictEqual(count, 5);
+});
+
+test('makeDBRhombusCells(3) returns 5×5 with 13 cells', () => {
+  const cells = makeDBRhombusCells(3);
+  assert.strictEqual(cells.length, 5);
+  assert.strictEqual(cells.flat().filter(Boolean).length, 13);
+});
+
+// ─── UNIT TESTS — makeDBFieldState ───────────────────────────────────────────
+
+suite('Unit — makeDBFieldState');
+
+test('square 2×2: outer borders pre-drawn, inner lines not drawn', () => {
+  const cells = makeDBCells(2);
+  const s = makeDBFieldState(cells);
+  assert.ok(s.h[0][0]); assert.ok(s.h[0][1]); // top border
+  assert.ok(s.h[2][0]); assert.ok(s.h[2][1]); // bottom border
+  assert.ok(s.v[0][0]); assert.ok(s.v[1][0]); // left border
+  assert.ok(s.v[0][2]); assert.ok(s.v[1][2]); // right border
+  assert.strictEqual(s.h[1][0], false); // inner line not drawn
+  assert.strictEqual(s.v[0][1], false); // inner line not drawn
   assert.ok(s.boxes.every(row => row.every(b => b === null)));
 });
 
-suite('Unit — dbDraw (square)');
-
-test('returns null if line already drawn (border)', () => {
-  const s = makeDBState(3);
-  assert.strictEqual(dbDraw(s, 3, true, 0, 0, 'p1'), null);
+test('triangle n=2: top border and left border pre-drawn', () => {
+  const cells = makeDBTriCells(2); // cells: [[T,T],[T,F]]
+  const s = makeDBFieldState(cells);
+  assert.ok(s.h[0][0]); assert.ok(s.h[0][1]); // top border (row 0)
+  assert.ok(s.v[0][0]); assert.ok(s.v[1][0]); // left border (col 0)
+  assert.ok(s.h[2][0]); // bottom border of row 1
+  assert.ok(s.v[0][2]); // right border of (0,1)
+  assert.strictEqual(s.h[1][0], false); // inner line (0,0)↔(1,0) not drawn
 });
 
-test('drawing an inner horizontal line does not mutate original state', () => {
-  const s = makeDBState(3);
-  dbDraw(s, 3, true, 1, 0, 'p1');
+// ─── UNIT TESTS — dbDraw ─────────────────────────────────────────────────────
+
+suite('Unit — dbDraw');
+
+test('returns null if line already drawn (border)', () => {
+  const cells = makeDBCells(2);
+  const s = makeDBFieldState(cells);
+  assert.strictEqual(dbDraw(s, cells, true, 0, 0, 'p1'), null);  // h[0][0] is border
+  assert.strictEqual(dbDraw(s, cells, false, 0, 0, 'p1'), null); // v[0][0] is border
+});
+
+test('drawing inner line does not mutate original state', () => {
+  const cells = makeDBCells(2);
+  const s = makeDBFieldState(cells);
+  dbDraw(s, cells, true, 1, 0, 'p1');
   assert.strictEqual(s.h[1][0], false);
 });
 
-test('drawing third side does not claim box; fourth side does', () => {
-  let s = makeDBState(2);
-  // box (0,0) needs h[0][0](border), h[1][0], v[0][0](border), v[0][1]
-  let r = dbDraw(s, 2, true, 1, 0, 'p1');   // h[1][0]
+test('third side does not claim box; fourth side does', () => {
+  const cells = makeDBCells(2);
+  let s = makeDBFieldState(cells);
+  // cell(0,0): h[0][0](B), h[1][0], v[0][0](B), v[0][1] → needs h[1][0] + v[0][1]
+  let r = dbDraw(s, cells, true, 1, 0, 'p1');
   assert.strictEqual(r.scored, 0); assert.strictEqual(r.newState.boxes[0][0], null);
-  r = dbDraw(r.newState, 2, false, 0, 1, 'p1'); // v[0][1] — completes box (0,0)
+  r = dbDraw(r.newState, cells, false, 0, 1, 'p1'); // v[0][1] → completes cell(0,0)
   assert.strictEqual(r.scored, 1); assert.strictEqual(r.newState.boxes[0][0], 'p1');
 });
 
-test('drawing a line that completes two boxes scores 2', () => {
-  let s = makeDBState(2);
-  // Prepare: v[0][1] and v[1][1] already drawn so both boxes need only h[1][0]
-  // box(0,0): h[0][0](B), h[1][0], v[0][0](B), v[0][1] → needs v[0][1] + h[1][0]
-  // box(1,0): h[1][0], h[2][0](B), v[1][0](B), v[1][1] → needs v[1][1] + h[1][0]
-  s = dbDraw(s, 2, false, 0, 1, 'p1').newState; // v[0][1]
-  s = dbDraw(s, 2, false, 1, 1, 'p1').newState; // v[1][1]
-  const r = dbDraw(s, 2, true, 1, 0, 'p1');     // h[1][0] → completes both
+test('one line can complete two boxes (scores 2)', () => {
+  const cells = makeDBCells(2);
+  let s = makeDBFieldState(cells);
+  // draw v[0][1] and v[1][1] so both box(0,0) and box(1,0) only need h[1][0]
+  s = dbDraw(s, cells, false, 0, 1, 'p1').newState;
+  s = dbDraw(s, cells, false, 1, 1, 'p1').newState;
+  const r = dbDraw(s, cells, true, 1, 0, 'p1');
   assert.strictEqual(r.scored, 2);
   assert.strictEqual(r.newState.boxes[0][0], 'p1');
   assert.strictEqual(r.newState.boxes[1][0], 'p1');
 });
 
+test('triangle cell: completing all 4 sides claims the cell', () => {
+  const cells = makeDBTriCells(3);
+  let s = makeDBFieldState(cells);
+  // cell(0,0): h[0][0](B), h[1][0], v[0][0](B), v[0][1]
+  let r = dbDraw(s, cells, true, 1, 0, 'p1');
+  assert.strictEqual(r.scored, 0);
+  r = dbDraw(r.newState, cells, false, 0, 1, 'p1');
+  assert.strictEqual(r.scored, 1);
+  assert.strictEqual(r.newState.boxes[0][0], 'p1');
+});
+
+// ─── UNIT TESTS — dbIsComplete / dbScore ─────────────────────────────────────
+
 suite('Unit — dbIsComplete / dbScore');
 
-test('dbIsComplete returns false on fresh board', () => {
-  assert.strictEqual(dbIsComplete(makeDBState(3)), false);
+test('dbIsComplete returns false on fresh square board', () => {
+  const cells = makeDBCells(3);
+  assert.strictEqual(dbIsComplete(makeDBFieldState(cells), cells), false);
 });
 
-test('dbIsComplete returns true when all boxes claimed', () => {
-  const s = makeDBState(2);
+test('dbIsComplete returns true when all field cells claimed', () => {
+  const cells = makeDBCells(2);
+  const s = makeDBFieldState(cells);
   for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) s.boxes[r][c] = 'p1';
-  assert.strictEqual(dbIsComplete(s), true);
+  assert.strictEqual(dbIsComplete(s, cells), true);
 });
 
-test('dbScore counts correctly', () => {
-  const boxes = [['p1','p2'],['p2','p1']];
-  const sc = dbScore(boxes);
+test('dbIsComplete for triangle ignores out-of-field cells', () => {
+  const cells = makeDBTriCells(2); // [T,T],[T,F] → 3 cells
+  const s = makeDBFieldState(cells);
+  s.boxes[0][0] = 'p1'; s.boxes[0][1] = 'p2'; s.boxes[1][0] = 'p1';
+  // cells[1][1] is false so boxes[1][1] is irrelevant
+  assert.strictEqual(dbIsComplete(s, cells), true);
+});
+
+test('dbScore counts correctly for square', () => {
+  const cells = makeDBCells(2);
+  const s = makeDBFieldState(cells);
+  s.boxes[0][0] = 'p1'; s.boxes[0][1] = 'p2'; s.boxes[1][0] = 'p2'; s.boxes[1][1] = 'p1';
+  const sc = dbScore(s, cells);
   assert.strictEqual(sc.p1, 2); assert.strictEqual(sc.p2, 2);
 });
 
-// ─── UNIT TESTS — Dots & Boxes (triangle) ────────────────────────────────────
-
-suite('Unit — makeDBTriState');
-
-test('borders pre-drawn: left edge dl[l][0], right edge dr[l][l], bottom h[n][j]', () => {
-  const s = makeDBTriState(3);
-  for (let l = 0; l < 3; l++) { assert.ok(s.dl[l][0]); assert.ok(s.dr[l][l]); }
-  for (let j = 0; j < 3; j++) assert.ok(s.h[3][j]);
-  assert.strictEqual(s.dl[1][1], false); // inner line not drawn
-});
-
-test('all triangles start null', () => {
-  const s = makeDBTriState(3);
-  assert.ok(s.upT.every(r => r.every(t => t === null)));
-  assert.ok(s.dnT.every(r => r.every(t => t === null)));
-});
-
-suite('Unit — dbTriDraw');
-
-test('returns null if line already drawn (border)', () => {
-  const s = makeDBTriState(3);
-  assert.strictEqual(dbTriDraw(s, 'dl', 0, 0, 'p1'), null);
-  assert.strictEqual(dbTriDraw(s, 'dr', 1, 1, 'p1'), null);
-  assert.strictEqual(dbTriDraw(s, 'h',  3, 0, 'p1'), null);
-});
-
-test('upward triangle (0,0) claimed when all 3 sides drawn', () => {
-  // Upward(0,0): dl[0][0](border), dr[0][0](border), h[1][0]
-  // dl and dr are already borders, so drawing h[1][0] completes it
-  let s = makeDBTriState(3);
-  const r = dbTriDraw(s, 'h', 1, 0, 'p1');
-  assert.strictEqual(r.scored, 1);
-  assert.strictEqual(r.newState.upT[0][0], 'p1');
-});
-
-test('downward triangle (1,0) claimed when all 3 sides drawn', () => {
-  // Downward(1,0): h[1][0], dr[1][0], dl[1][1]
-  let s = makeDBTriState(3);
-  s = dbTriDraw(s, 'h',  1, 0, 'p1').newState;  // also claims upT[0][0]
-  s = dbTriDraw(s, 'dr', 1, 0, 'p2').newState;
-  const r = dbTriDraw(s, 'dl', 1, 1, 'p2');
-  assert.strictEqual(r.scored, 1);
-  assert.strictEqual(r.newState.dnT[1][0], 'p2');
-});
-
-test('does not mutate original state', () => {
-  const s = makeDBTriState(3);
-  dbTriDraw(s, 'h', 1, 0, 'p1');
-  assert.strictEqual(s.h[1][0], false);
-});
-
-suite('Unit — dbTriIsComplete / dbTriScore');
-
-test('dbTriIsComplete returns false on fresh state', () => {
-  assert.strictEqual(dbTriIsComplete(makeDBTriState(2)), false);
-});
-
-test('dbTriScore counts across upT and dnT', () => {
-  const s = makeDBTriState(2);
-  s.upT[0][0] = 'p1'; s.upT[1][0] = 'p2'; s.upT[1][1] = 'p1'; s.dnT[1][0] = 'p2';
-  const sc = dbTriScore(s);
-  assert.strictEqual(sc.p1, 2); assert.strictEqual(sc.p2, 2);
+test('dbScore for triangle ignores out-of-field cells', () => {
+  const cells = makeDBTriCells(2);
+  const s = makeDBFieldState(cells);
+  s.boxes[0][0] = 'p1'; s.boxes[0][1] = 'p1'; s.boxes[1][0] = 'p2';
+  s.boxes[1][1] = 'p2'; // out-of-field — must be ignored
+  const sc = dbScore(s, cells);
+  assert.strictEqual(sc.p1, 2); assert.strictEqual(sc.p2, 1);
 });
 
 // ─── INTEGRATION TESTS — Dots & Boxes ────────────────────────────────────────
 
-suite('Integration — DB square 2×2 full game: p1 wins');
+suite('Integration — DB square 2×2 full game');
 
 test('all 4 boxes get claimed in a 2×2 full game', () => {
-  let s = makeDBState(2);
-  // Draw inner lines: v[0][1], v[1][1], then h[1][0] and h[1][1]
-  // h[1][0] completes box(0,0) and box(1,0); h[1][1] completes box(0,1) and box(1,1)
-  s = dbDraw(s, 2, false, 0, 1, 'p1').newState; // v[0][1]
-  s = dbDraw(s, 2, false, 1, 1, 'p2').newState; // v[1][1]
-  s = dbDraw(s, 2, true,  1, 0, 'p1').newState; // h[1][0] → claims box(0,0) + box(1,0)
-  s = dbDraw(s, 2, true,  1, 1, 'p1').newState; // h[1][1] → claims box(0,1) + box(1,1)
-  assert.ok(dbIsComplete(s));
-  const sc = dbScore(s.boxes);
+  const cells = makeDBCells(2);
+  let s = makeDBFieldState(cells);
+  s = dbDraw(s, cells, false, 0, 1, 'p1').newState; // v[0][1]
+  s = dbDraw(s, cells, false, 1, 1, 'p2').newState; // v[1][1]
+  s = dbDraw(s, cells, true,  1, 0, 'p1').newState; // h[1][0] → claims (0,0)+(1,0)
+  s = dbDraw(s, cells, true,  1, 1, 'p1').newState; // h[1][1] → claims (0,1)+(1,1)
+  assert.ok(dbIsComplete(s, cells));
+  const sc = dbScore(s, cells);
   assert.strictEqual(sc.p1 + sc.p2, 4);
 });
 
-suite('Integration — DB triangle n=2 full game');
+suite('Integration — DB triangle n=3 claiming corner cell');
 
-test('full n=2 triangle: all 4 triangles claimed', () => {
-  let s = makeDBTriState(2);
-  // n=2: upT[0][0], upT[1][0], upT[1][1], dnT[1][0]
-  // Upward(0,0): dl[0][0](B), dr[0][0](B), h[1][0] → draw h[1][0]
-  let r = dbTriDraw(s, 'h', 1, 0, 'p1'); s = r.newState;
-  assert.strictEqual(s.upT[0][0], 'p1');
-  // Upward(1,0): dl[1][0](B), dr[1][0], h[2][0](B) → draw dr[1][0]
-  r = dbTriDraw(s, 'dr', 1, 0, 'p2'); s = r.newState;
-  // Downward(1,0): h[1][0](drawn), dr[1][0](drawn), dl[1][1] → draw dl[1][1]
-  r = dbTriDraw(s, 'dl', 1, 1, 'p2'); s = r.newState;
-  assert.strictEqual(s.dnT[1][0], 'p2');
-  assert.strictEqual(s.upT[1][0], 'p2');
-  // Upward(1,1): dl[1][1](drawn), dr[1][1](B), h[2][1](B) → already complete
-  assert.strictEqual(s.upT[1][1], 'p2');
-  assert.ok(dbTriIsComplete(s));
-  const sc = dbTriScore(s);
-  assert.strictEqual(sc.p1, 1); assert.strictEqual(sc.p2, 3);
+test('two inner lines complete top-left cell in n=3 triangle', () => {
+  const cells = makeDBTriCells(3);
+  let s = makeDBFieldState(cells);
+  s = dbDraw(s, cells, true,  1, 0, 'p1').newState;
+  const r = dbDraw(s, cells, false, 0, 1, 'p1');
+  assert.strictEqual(r.scored, 1);
+  assert.strictEqual(r.newState.boxes[0][0], 'p1');
+});
+
+suite('Integration — DB rhombus n=2 full game');
+
+test('p1 claims all 5 cells in n=2 rhombus in 4 moves', () => {
+  // n=2 rhombus: cells (0,1),(1,0),(1,1),(1,2),(2,1) — 5 cells
+  // inner lines: h[1][1], h[2][1], v[1][1], v[1][2]
+  // drawing each inner line also completes the outer cells (3 border sides + 1 inner)
+  const cells = makeDBRhombusCells(2);
+  let s = makeDBFieldState(cells), r;
+  r = dbDraw(s, cells, true,  1, 1, 'p1'); s = r.newState; assert.strictEqual(r.scored, 1); // claims (0,1)
+  r = dbDraw(s, cells, true,  2, 1, 'p1'); s = r.newState; assert.strictEqual(r.scored, 1); // claims (2,1)
+  r = dbDraw(s, cells, false, 1, 1, 'p1'); s = r.newState; assert.strictEqual(r.scored, 1); // claims (1,0)
+  r = dbDraw(s, cells, false, 1, 2, 'p1');                  assert.strictEqual(r.scored, 2); // claims (1,1)+(1,2)
+  assert.ok(dbIsComplete(r.newState, cells));
+  const sc = dbScore(r.newState, cells);
+  assert.strictEqual(sc.p1, 5); assert.strictEqual(sc.p2, 0);
 });
 
 // ─── 1-TO-1 TESTS — Dots & Boxes ─────────────────────────────────────────────
 
-suite('1-to-1 — DB square exact state after drawing h[1][0] in 3×3');
+suite('1-to-1 — DB square: first inner line leaves no box claimed');
 
-test('h[1][0] drawn, no box claimed, original state unchanged', () => {
-  const s0 = makeDBState(3);
-  const r  = dbDraw(s0, 3, true, 1, 0, 'p1');
+test('h[1][0] drawn in 3×3, scored=0, original state unchanged', () => {
+  const cells = makeDBCells(3);
+  const s0 = makeDBFieldState(cells);
+  const r = dbDraw(s0, cells, true, 1, 0, 'p1');
   assert.strictEqual(r.scored, 0);
   assert.ok(r.newState.h[1][0]);
-  assert.strictEqual(s0.h[1][0], false);
+  assert.strictEqual(s0.h[1][0], false); // immutable
   assert.ok(r.newState.boxes.every(row => row.every(b => b === null)));
 });
 
-suite('1-to-1 — DB tri exact state: upT[0][0] claimed with first move in n=3');
+suite('1-to-1 — DB field cell counts');
 
-test('drawing h[1][0] in n=3 immediately claims upT[0][0]', () => {
-  const s = makeDBTriState(3);
-  const r = dbTriDraw(s, 'h', 1, 0, 'p2');
-  assert.strictEqual(r.scored, 1);
-  assert.strictEqual(r.newState.upT[0][0], 'p2');
-  assert.strictEqual(r.newState.dnT[1][0], null); // downward not yet complete
+test('makeDBTriCells(4) has 10 cells (4+3+2+1)', () => {
+  assert.strictEqual(makeDBTriCells(4).flat().filter(Boolean).length, 10);
+});
+
+test('makeDBRhombusCells(4) has 25 cells', () => {
+  assert.strictEqual(makeDBRhombusCells(4).flat().filter(Boolean).length, 25);
 });
 
 // ─── Summary ─────────────────────────────────────────────────────────────────
