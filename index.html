@@ -321,6 +321,46 @@
   #db-status-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
   #db-score { font-size: 0.85rem; color: var(--muted); }
 
+  /* ── Hangman ── */
+  .hm-layout { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .hm-left { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #hm-svg svg { display:block; width:100%; max-width:240px; }
+  .hm-right { display:flex; flex-direction:column; align-items:center; gap:14px; flex:1; min-width:260px; }
+  .hm-lives { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; }
+  .hm-heart { font-size:1.35rem; transition:opacity 0.3s, transform 0.3s; }
+  .hm-heart.lost { opacity:0.15; transform:scale(0.75); }
+  .hm-word { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .hm-letter { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:26px; }
+  .hm-letter-char { font-size:1.5rem; font-weight:700; min-height:1.8rem; line-height:1; }
+  .hm-letter-line { width:26px; height:2px; background:var(--muted); border-radius:1px; }
+  .hm-keyboard { display:flex; flex-direction:column; align-items:center; gap:5px; }
+  .hm-kb-row { display:flex; gap:4px; justify-content:center; flex-wrap:wrap; }
+  .hm-key {
+    width:29px; height:33px;
+    background:var(--panel); border:1px solid var(--line);
+    color:var(--text); border-radius:6px;
+    font-size:0.72rem; font-weight:700;
+    cursor:pointer; font-family:inherit;
+    transition:background 0.1s, opacity 0.15s, border-color 0.15s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hm-key:hover:not(:disabled) { background:#253347; }
+  .hm-key:disabled { cursor:default; }
+  .hm-key.correct { border-color:var(--x); color:var(--x); opacity:0.6; }
+  .hm-key.wrong { border-color:var(--p1); color:var(--p1); opacity:0.4; }
+  .hm-wrong { font-size:0.82rem; color:var(--muted); text-align:center; min-height:1rem; }
+  .hm-level-opts { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+  .hm-level-card {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:20px 32px; background:var(--panel); border:2px solid var(--line);
+    border-radius:16px; cursor:pointer; font-family:inherit;
+    transition:border-color 0.15s, background 0.15s, transform 0.15s;
+  }
+  .hm-level-card:hover { background:#253347; border-color:var(--x); transform:translateY(-2px); }
+  .hm-level-num { font-size:2rem; font-weight:800; color:var(--x); }
+  .hm-level-name { font-size:1rem; font-weight:600; color:var(--text); }
+  .hm-level-hint { font-size:0.78rem; color:var(--muted); }
+
   /* ── Win overlay ── */
   #win-overlay {
     position: fixed; inset: 0;
@@ -437,6 +477,26 @@
         <circle cx="38" cy="38" r="5" fill="none" stroke="#f472b6" stroke-width="2.5"/>
       </svg>
       <span class="game-card-name">Dots &amp; Boxes</span>
+    </button>
+
+    <button class="game-card" data-action="go-hm-detail">
+      <svg class="game-card-icon" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="6" y1="52" x2="22" y2="52" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="12" y1="52" x2="12" y2="5" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="12" y1="5" x2="40" y2="5" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="12" y1="17" x2="24" y2="5" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+        <line x1="40" y1="5" x2="40" y2="11" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="40" cy="19" r="7" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+        <circle cx="38" cy="18" r="1.2" fill="#e2e8f0"/>
+        <circle cx="42" cy="18" r="1.2" fill="#e2e8f0"/>
+        <path d="M 38 22 Q 40 24 42 22" stroke="#e2e8f0" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <line x1="40" y1="26" x2="40" y2="40" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
+        <line x1="40" y1="31" x2="32" y2="25" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
+        <line x1="40" y1="31" x2="48" y2="25" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
+        <line x1="40" y1="40" x2="34" y2="50" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
+        <line x1="40" y1="40" x2="46" y2="50" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="game-card-name">Виселица</span>
     </button>
 
   </div>
@@ -932,6 +992,157 @@
   <div class="controls">
     <button class="btn" data-action="db-reset">New game</button>
     <button class="btn" data-action="menu">Menu</button>
+  </div>
+</div>
+
+<!-- ═══ HANGMAN DETAIL ═══ -->
+<div id="hm-detail" class="screen">
+  <div class="detail-wrap">
+    <button class="back-btn" data-action="menu">&#8592; Back</button>
+    <div class="detail-top">
+      <svg class="detail-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="18" fill="#1e293b"/>
+        <line x1="10" y1="72" x2="30" y2="72" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="18" y1="72" x2="18" y2="10" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="18" y1="10" x2="58" y2="10" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="18" y1="26" x2="34" y2="10" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="58" y1="10" x2="58" y2="18" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="58" cy="30" r="11" fill="none" stroke="#e2e8f0" stroke-width="2.5"/>
+        <circle cx="55" cy="28" r="1.8" fill="#e2e8f0"/>
+        <circle cx="61" cy="28" r="1.8" fill="#e2e8f0"/>
+        <path d="M 55 33 Q 58 37 61 33" stroke="#e2e8f0" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <line x1="58" y1="41" x2="58" y2="58" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="58" y1="46" x2="48" y2="38" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="58" y1="46" x2="68" y2="38" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="58" y1="58" x2="50" y2="70" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="58" y1="58" x2="66" y2="70" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="detail-meta">
+        <h1 class="detail-title">Виселица</h1>
+        <div class="detail-tags">
+          <span class="tag">1 игрок</span>
+          <span class="tag">Русские слова</span>
+          <span class="tag">Классика</span>
+        </div>
+      </div>
+    </div>
+    <p class="detail-desc">Угадай слово по буквам, пока человечек не повешен. 300 русских слов, 3 уровня сложности. На каждое слово — 9 попыток.</p>
+    <div class="screenshots">
+      <!-- Screenshot 1: mid-game, 4 wrong guesses, word _ О _ А К А -->
+      <div class="screenshot">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#0f172a"/>
+          <rect x="3" y="3" width="194" height="194" rx="8" fill="#1e293b"/>
+          <!-- Gallows -->
+          <line x1="14" y1="178" x2="50" y2="178" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="28" y1="178" x2="28" y2="20" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="28" y1="20" x2="108" y2="20" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="28" y1="44" x2="58" y2="20" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="108" y1="20" x2="108" y2="32" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Head -->
+          <circle cx="108" cy="46" r="13" fill="none" stroke="#e2e8f0" stroke-width="2.5"/>
+          <!-- Worried face (4 wrong) -->
+          <circle cx="104" cy="44" r="1.8" fill="#e2e8f0"/>
+          <circle cx="112" cy="44" r="1.8" fill="#e2e8f0"/>
+          <path d="M 104 50 Q 108 46 112 50" stroke="#e2e8f0" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <line x1="101" y1="40" x2="107" y2="42" stroke="#e2e8f0" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="109" y1="42" x2="115" y2="40" stroke="#e2e8f0" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- Body -->
+          <line x1="108" y1="59" x2="108" y2="105" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Left arm raised -->
+          <line x1="108" y1="74" x2="86" y2="60" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Right arm raised -->
+          <line x1="108" y1="74" x2="130" y2="60" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Word display: _ О _ А К А -->
+          <text x="130" y="80" font-size="13" fill="#94a3b8" font-family="monospace" text-anchor="middle">_ О _ А К А</text>
+          <!-- Hearts -->
+          <text x="130" y="100" font-size="11" fill="#e2e8f0" text-anchor="middle">❤❤❤❤❤</text>
+          <text x="130" y="115" font-size="11" fill="#334155" text-anchor="middle">❤❤❤❤</text>
+          <!-- Wrong letters -->
+          <text x="130" y="135" font-size="9" fill="#ef4444" text-anchor="middle">Ошибки: Б, В, Г, Д</text>
+        </svg>
+      </div>
+      <!-- Screenshot 2: game over with dead man -->
+      <div class="screenshot">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#0f172a"/>
+          <rect x="3" y="3" width="194" height="194" rx="8" fill="#1e293b"/>
+          <!-- Gallows -->
+          <line x1="14" y1="178" x2="50" y2="178" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="28" y1="178" x2="28" y2="20" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="28" y1="20" x2="108" y2="20" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="28" y1="44" x2="58" y2="20" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Red rope -->
+          <line x1="108" y1="20" x2="108" y2="32" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Head (red) -->
+          <circle cx="108" cy="46" r="13" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+          <!-- X eyes -->
+          <line x1="103" y1="41" x2="108" y2="46" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+          <line x1="108" y1="41" x2="103" y2="46" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+          <line x1="109" y1="41" x2="114" y2="46" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+          <line x1="114" y1="41" x2="109" y2="46" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+          <!-- Tongue -->
+          <ellipse cx="108" cy="56" rx="3" ry="4.5" fill="#f472b6"/>
+          <!-- Body (red) -->
+          <line x1="108" y1="59" x2="108" y2="105" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="108" y1="74" x2="86" y2="95" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="108" y1="74" x2="130" y2="95" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="108" y1="105" x2="92" y2="135" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="108" y1="105" x2="124" y2="135" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="92" y1="135" x2="80" y2="142" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="124" y1="135" x2="136" y2="142" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Revealed word -->
+          <text x="130" y="100" font-size="12" fill="#ef4444" font-family="monospace" text-anchor="middle">С О Б А К А</text>
+        </svg>
+      </div>
+    </div>
+    <button class="play-btn" data-action="go-hm-config">Играть</button>
+  </div>
+</div>
+
+<!-- ═══ HANGMAN CONFIG ═══ -->
+<div id="hm-config" class="screen">
+  <div class="config-wrap">
+    <button class="back-btn" data-action="go-hm-detail">&#8592; Back</button>
+    <h1>Выбери уровень</h1>
+    <div class="hm-level-opts">
+      <button class="hm-level-card" data-action="hm-start" data-level="1">
+        <span class="hm-level-num">1</span>
+        <span class="hm-level-name">Лёгкий</span>
+        <span class="hm-level-hint">Простые слова</span>
+      </button>
+      <button class="hm-level-card" data-action="hm-start" data-level="2">
+        <span class="hm-level-num">2</span>
+        <span class="hm-level-name">Средний</span>
+        <span class="hm-level-hint">Сложнее</span>
+      </button>
+      <button class="hm-level-card" data-action="hm-start" data-level="3">
+        <span class="hm-level-num">3</span>
+        <span class="hm-level-name">Сложный</span>
+        <span class="hm-level-hint">Длинные слова</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HANGMAN GAME ═══ -->
+<div id="hm" class="screen">
+  <h1 class="page-title">Виселица</h1>
+  <div class="hm-layout">
+    <div class="hm-left">
+      <div id="hm-svg"></div>
+    </div>
+    <div class="hm-right">
+      <div id="hm-lives" class="hm-lives"></div>
+      <div id="hm-word" class="hm-word"></div>
+      <div id="hm-keyboard" class="hm-keyboard"></div>
+      <div id="hm-wrong" class="hm-wrong"></div>
+      <div id="hm-status" class="status"></div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn" data-action="hm-reset">Новое слово</button>
+    <button class="btn" data-action="menu">Меню</button>
   </div>
 </div>
 
@@ -1443,6 +1654,211 @@
     },
   };
 
+  // ── Hangman ──
+  const HM_KB_ROWS = [
+    ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х','Ъ'],
+    ['Ф','Ы','В','А','П','Р','О','Л','Д','Ж','Э'],
+    ['Я','Ч','С','М','И','Т','Ь','Б','Ю','Ё'],
+  ];
+
+  const hm = {
+    statusEl:  document.getElementById('hm-status'),
+    wordEl:    document.getElementById('hm-word'),
+    livesEl:   document.getElementById('hm-lives'),
+    svgWrap:   document.getElementById('hm-svg'),
+    kbEl:      document.getElementById('hm-keyboard'),
+    wrongEl:   document.getElementById('hm-wrong'),
+    word: '', guessed: new Set(), level: 1, done: false,
+
+    start(level) {
+      this.level = level;
+      this.word = hmPickWord(level);
+      this.guessed = new Set();
+      this.done = false;
+      this.statusEl.textContent = '';
+      this.statusEl.classList.remove('win');
+      this.buildKb();
+      this.render();
+    },
+
+    reset() { this.start(this.level); },
+
+    buildKb() {
+      this.kbEl.innerHTML = '';
+      for (const row of HM_KB_ROWS) {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'hm-kb-row';
+        for (const letter of row) {
+          const btn = document.createElement('button');
+          btn.className = 'hm-key';
+          btn.textContent = letter;
+          btn.dataset.letter = letter;
+          btn.addEventListener('click', () => this.guess(letter));
+          rowEl.appendChild(btn);
+        }
+        this.kbEl.appendChild(rowEl);
+      }
+    },
+
+    guess(letter) {
+      if (this.done || this.guessed.has(letter)) return;
+      this.guessed.add(letter);
+      const wrong = hmWrongGuesses(this.word, this.guessed);
+      if (hmIsWon(this.word, this.guessed)) {
+        this.done = true;
+        this.render();
+        showWinOverlay('Вы выиграли!', '#38bdf8', () => this.reset());
+      } else if (wrong.length >= 9) {
+        this.done = true;
+        this.render();
+        this.statusEl.textContent = 'Слово: ' + this.word;
+        this.statusEl.classList.add('win');
+      } else {
+        this.render();
+      }
+    },
+
+    render() {
+      this.renderHangman();
+      this.renderWord();
+      this.renderLives();
+      this.renderKb();
+      this.renderWrong();
+    },
+
+    renderHangman() {
+      const wrong = hmWrongGuesses(this.word, this.guessed).length;
+      const NS = 'http://www.w3.org/2000/svg';
+      const mk = (tag, attrs) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        return e;
+      };
+      const svg = mk('svg', {viewBox: '0 0 220 280'});
+      svg.style.cssText = 'display:block;width:100%;max-width:240px;';
+
+      const dead = wrong >= 9;
+      const bc = dead ? '#ef4444' : '#e2e8f0';
+
+      // Gallows
+      svg.appendChild(mk('line', {x1:20,y1:265,x2:90,y2:265, stroke:'#475569','stroke-width':5,'stroke-linecap':'round'}));
+      svg.appendChild(mk('line', {x1:52,y1:265,x2:52,y2:25,  stroke:'#475569','stroke-width':5,'stroke-linecap':'round'}));
+      svg.appendChild(mk('line', {x1:52,y1:25, x2:160,y2:25,  stroke:'#475569','stroke-width':5,'stroke-linecap':'round'}));
+      svg.appendChild(mk('line', {x1:52,y1:75, x2:96,y2:25,   stroke:'#475569','stroke-width':3.5,'stroke-linecap':'round'}));
+      svg.appendChild(mk('line', {x1:160,y1:25,x2:160,y2:57,  stroke: dead ? '#ef4444' : '#94a3b8','stroke-width':3,'stroke-linecap':'round'}));
+
+      if (wrong >= 1) {
+        svg.appendChild(mk('circle', {cx:160,cy:78,r:21, fill:'none', stroke:bc,'stroke-width':3}));
+        if (!dead) {
+          if (wrong <= 4) {
+            // Alive face + smile
+            svg.appendChild(mk('circle', {cx:153,cy:75,r:2.5,fill:bc}));
+            svg.appendChild(mk('circle', {cx:167,cy:75,r:2.5,fill:bc}));
+            svg.appendChild(mk('path', {d:'M 153 83 Q 160 90 167 83',stroke:bc,'stroke-width':2,fill:'none','stroke-linecap':'round'}));
+          } else if (wrong <= 7) {
+            // Worried face + frown
+            svg.appendChild(mk('circle', {cx:153,cy:75,r:2.5,fill:bc}));
+            svg.appendChild(mk('circle', {cx:167,cy:75,r:2.5,fill:bc}));
+            svg.appendChild(mk('path', {d:'M 153 87 Q 160 82 167 87',stroke:bc,'stroke-width':2,fill:'none','stroke-linecap':'round'}));
+            svg.appendChild(mk('line', {x1:150,y1:70,x2:156,y2:73,stroke:bc,'stroke-width':2,'stroke-linecap':'round'}));
+            svg.appendChild(mk('line', {x1:164,y1:73,x2:170,y2:70,stroke:bc,'stroke-width':2,'stroke-linecap':'round'}));
+          } else {
+            // Terrified face + sweat drop
+            svg.appendChild(mk('circle', {cx:153,cy:75,r:3,fill:bc}));
+            svg.appendChild(mk('circle', {cx:167,cy:75,r:3,fill:bc}));
+            svg.appendChild(mk('path', {d:'M 153 87 Q 160 81 167 87',stroke:bc,'stroke-width':2,fill:'none','stroke-linecap':'round'}));
+            svg.appendChild(mk('line', {x1:148,y1:68,x2:156,y2:72,stroke:bc,'stroke-width':2,'stroke-linecap':'round'}));
+            svg.appendChild(mk('line', {x1:164,y1:72,x2:172,y2:68,stroke:bc,'stroke-width':2,'stroke-linecap':'round'}));
+            svg.appendChild(mk('ellipse', {cx:178,cy:79,rx:2.5,ry:4.5,fill:'#38bdf8',opacity:'0.8'}));
+          }
+        } else {
+          // Dead: X eyes + pink tongue
+          svg.appendChild(mk('line', {x1:149,y1:71,x2:157,y2:79,stroke:'#ef4444','stroke-width':2.5,'stroke-linecap':'round'}));
+          svg.appendChild(mk('line', {x1:157,y1:71,x2:149,y2:79,stroke:'#ef4444','stroke-width':2.5,'stroke-linecap':'round'}));
+          svg.appendChild(mk('line', {x1:163,y1:71,x2:171,y2:79,stroke:'#ef4444','stroke-width':2.5,'stroke-linecap':'round'}));
+          svg.appendChild(mk('line', {x1:171,y1:71,x2:163,y2:79,stroke:'#ef4444','stroke-width':2.5,'stroke-linecap':'round'}));
+          svg.appendChild(mk('ellipse', {cx:160,cy:93,rx:4.5,ry:6,fill:'#f472b6'}));
+        }
+      }
+
+      if (wrong >= 2) svg.appendChild(mk('line', {x1:160,y1:99,x2:160,y2:163,stroke:bc,'stroke-width':3,'stroke-linecap':'round'}));
+
+      // Left arm: raised at 3-4, drooped at 5+
+      if (wrong >= 3) {
+        const [lx,ly] = wrong <= 4 ? [126,100] : [126,148];
+        svg.appendChild(mk('line', {x1:160,y1:119,x2:lx,y2:ly,stroke:bc,'stroke-width':3,'stroke-linecap':'round'}));
+      }
+      // Right arm: raised at 4-5, drooped at 6+
+      if (wrong >= 4) {
+        const [rx,ry] = wrong <= 5 ? [194,100] : [194,148];
+        svg.appendChild(mk('line', {x1:160,y1:119,x2:rx,y2:ry,stroke:bc,'stroke-width':3,'stroke-linecap':'round'}));
+      }
+
+      if (wrong >= 6) svg.appendChild(mk('line', {x1:160,y1:163,x2:134,y2:210,stroke:bc,'stroke-width':3,'stroke-linecap':'round'}));
+      if (wrong >= 7) svg.appendChild(mk('line', {x1:160,y1:163,x2:186,y2:210,stroke:bc,'stroke-width':3,'stroke-linecap':'round'}));
+
+      if (wrong >= 8) {
+        svg.appendChild(mk('line', {x1:134,y1:210,x2:112,y2:223,stroke:bc,'stroke-width':3,'stroke-linecap':'round'}));
+        svg.appendChild(mk('line', {x1:186,y1:210,x2:208,y2:223,stroke:bc,'stroke-width':3,'stroke-linecap':'round'}));
+      }
+
+      this.svgWrap.innerHTML = '';
+      this.svgWrap.appendChild(svg);
+    },
+
+    renderWord() {
+      this.wordEl.innerHTML = '';
+      const wrong = hmWrongGuesses(this.word, this.guessed).length;
+      const gameOver = this.done && wrong >= 9;
+      for (const ch of this.word) {
+        const div = document.createElement('div');
+        div.className = 'hm-letter';
+        const charEl = document.createElement('div');
+        charEl.className = 'hm-letter-char';
+        if (this.guessed.has(ch)) {
+          charEl.textContent = ch;
+        } else if (gameOver) {
+          charEl.textContent = ch;
+          charEl.style.color = '#ef4444';
+        }
+        div.appendChild(charEl);
+        const line = document.createElement('div');
+        line.className = 'hm-letter-line';
+        div.appendChild(line);
+        this.wordEl.appendChild(div);
+      }
+    },
+
+    renderLives() {
+      const wrong = hmWrongGuesses(this.word, this.guessed).length;
+      this.livesEl.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const span = document.createElement('span');
+        span.className = 'hm-heart' + (i < wrong ? ' lost' : '');
+        span.textContent = '❤';
+        this.livesEl.appendChild(span);
+      }
+    },
+
+    renderKb() {
+      for (const btn of this.kbEl.querySelectorAll('.hm-key')) {
+        const letter = btn.dataset.letter;
+        if (this.guessed.has(letter)) {
+          btn.disabled = true;
+          btn.classList.add(this.word.includes(letter) ? 'correct' : 'wrong');
+        } else {
+          btn.disabled = this.done;
+          btn.classList.remove('wrong', 'correct');
+        }
+      }
+    },
+
+    renderWrong() {
+      const wrong = hmWrongGuesses(this.word, this.guessed);
+      this.wrongEl.textContent = wrong.length ? 'Ошибки: ' + wrong.join(', ') : '';
+    },
+  };
+
   // ── Navigation ──
   document.body.addEventListener('click', e => {
     const target = e.target.closest('[data-action]');
@@ -1455,6 +1871,8 @@
     else if (action === 'go-c4-config')   showScreen('c4-config');
     else if (action === 'go-db-detail')   showScreen('db-detail');
     else if (action === 'go-db-config')   showScreen('db-config');
+    else if (action === 'go-hm-detail')   showScreen('hm-detail');
+    else if (action === 'go-hm-config')   showScreen('hm-config');
     else if (action === 'ttt-start')      { ttt.reset(); showScreen('ttt'); }
     else if (action === 'ttt-reset')      ttt.reset();
     else if (action === 'c4-start')       { c4.start(parseInt(target.dataset.size, 10)); showScreen('c4'); }
@@ -1462,6 +1880,8 @@
     else if (action === 'db-type')        { dbPendingType = target.dataset.type; showScreen('db-size'); }
     else if (action === 'db-start')       { db.start(dbPendingType, parseInt(target.dataset.size, 10)); showScreen('db'); }
     else if (action === 'db-reset')       db.reset();
+    else if (action === 'hm-start')       { hm.start(parseInt(target.dataset.level, 10)); showScreen('hm'); }
+    else if (action === 'hm-reset')       hm.reset();
   });
 </script>
 </body>

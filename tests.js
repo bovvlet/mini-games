@@ -4,6 +4,7 @@ const assert = require('assert');
 const {
   checkTTTWinner, checkC4WinFrom, c4Drop, isC4BoardFull, makeC4Board,
   makeDBCells, makeDBTriCells, makeDBRhombusCells, makeDBFieldState, dbDraw, dbIsComplete, dbScore,
+  HM_WORDS, hmPickWord, hmWrongGuesses, hmIsWon,
 } = require('./game-logic.js');
 
 let passed = 0, failed = 0;
@@ -491,6 +492,135 @@ test('makeDBTriCells(4) has 10 cells (4+3+2+1)', () => {
 
 test('makeDBRhombusCells(4) has 25 cells', () => {
   assert.strictEqual(makeDBRhombusCells(4).flat().filter(Boolean).length, 25);
+});
+
+// ─── HANGMAN TESTS ───────────────────────────────────────────────────────────
+
+suite('Unit — hmWrongGuesses');
+
+test('returns empty array with no guesses', () => {
+  assert.deepStrictEqual(hmWrongGuesses('КОШКА', new Set()), []);
+});
+
+test('correct guess not included in wrong list', () => {
+  assert.deepStrictEqual(hmWrongGuesses('КОШКА', new Set(['К'])), []);
+});
+
+test('wrong guess appears in result', () => {
+  const wrong = hmWrongGuesses('КОШКА', new Set(['К', 'А', 'Б']));
+  assert.deepStrictEqual(wrong, ['Б']);
+});
+
+test('multiple wrong guesses all returned', () => {
+  const wrong = hmWrongGuesses('КОТ', new Set(['А', 'Б', 'В', 'К']));
+  assert.deepStrictEqual(wrong.sort(), ['А', 'Б', 'В'].sort());
+});
+
+suite('Unit — hmIsWon');
+
+test('returns false with no guesses', () => {
+  assert.strictEqual(hmIsWon('КОШКА', new Set()), false);
+});
+
+test('returns false with only some letters guessed', () => {
+  assert.strictEqual(hmIsWon('КОШКА', new Set(['К','О'])), false);
+});
+
+test('returns true when all unique letters guessed', () => {
+  // КОШКА has letters К, О, Ш, А
+  assert.strictEqual(hmIsWon('КОШКА', new Set(['К','О','Ш','А'])), true);
+});
+
+test('returns true even with extra wrong guesses in set', () => {
+  assert.strictEqual(hmIsWon('КОТ', new Set(['К','О','Т','Б','В'])), true);
+});
+
+suite('Unit — hmPickWord');
+
+test('returns a string for each level', () => {
+  assert.strictEqual(typeof hmPickWord(1), 'string');
+  assert.strictEqual(typeof hmPickWord(2), 'string');
+  assert.strictEqual(typeof hmPickWord(3), 'string');
+});
+
+test('word from level 1 is in the level 1 list', () => {
+  for (let i = 0; i < 10; i++) {
+    const w = hmPickWord(1);
+    assert.ok(HM_WORDS[1].includes(w), `${w} not in level 1`);
+  }
+});
+
+test('word from level 3 is in the level 3 list', () => {
+  for (let i = 0; i < 10; i++) {
+    const w = hmPickWord(3);
+    assert.ok(HM_WORDS[3].includes(w), `${w} not in level 3`);
+  }
+});
+
+test('each level has exactly 100 words', () => {
+  assert.strictEqual(HM_WORDS[1].length, 100);
+  assert.strictEqual(HM_WORDS[2].length, 100);
+  assert.strictEqual(HM_WORDS[3].length, 100);
+});
+
+suite('Integration — HM full win game');
+
+test('guessing all letters wins the word ТИГР', () => {
+  const word = 'ТИГР';
+  const guessed = new Set();
+  let won = false;
+  for (const letter of ['Т','И','Г','Р']) {
+    guessed.add(letter);
+    if (hmIsWon(word, guessed)) { won = true; break; }
+  }
+  assert.strictEqual(won, true);
+  assert.strictEqual(hmWrongGuesses(word, guessed).length, 0);
+});
+
+test('9 wrong guesses trigger game over', () => {
+  const word = 'КОТ';
+  const guessed = new Set(['А','Б','В','Г','Д','Е','Ж','З','И']);
+  assert.strictEqual(hmWrongGuesses(word, guessed).length, 9);
+  assert.strictEqual(hmIsWon(word, guessed), false);
+});
+
+suite('Integration — HM partial game');
+
+test('mid-game: 3 correct + 2 wrong guesses', () => {
+  const word = 'СОБАКА';
+  const guessed = new Set(['С','О','Б','Х','Й']); // С,О,Б correct; Х,Й wrong
+  assert.strictEqual(hmWrongGuesses(word, guessed).length, 2);
+  assert.strictEqual(hmIsWon(word, guessed), false);
+});
+
+test('turn does not change if wrong guess — wrong count increments', () => {
+  const word = 'ВОЛК';
+  const g1 = new Set(['А']);
+  const g2 = new Set(['А','Б']);
+  assert.strictEqual(hmWrongGuesses(word, g1).length, 1);
+  assert.strictEqual(hmWrongGuesses(word, g2).length, 2);
+});
+
+suite('1-to-1 — HM exact state snapshots');
+
+test('КОШКА: guessing К,О,Ш,А reveals word, Б,В wrong', () => {
+  const word = 'КОШКА';
+  const guessed = new Set(['К','О','Ш','А','Б','В']);
+  assert.strictEqual(hmIsWon(word, guessed), true);
+  assert.deepStrictEqual(hmWrongGuesses(word, guessed).sort(), ['Б','В'].sort());
+});
+
+test('revealed letters match for СЛОН after guessing С and Л', () => {
+  const word = 'СЛОН';
+  const guessed = new Set(['С','Л']);
+  const revealed = [...word].map(ch => guessed.has(ch) ? ch : '_');
+  assert.deepStrictEqual(revealed, ['С','Л','_','_']);
+});
+
+test('no duplicate words across levels', () => {
+  const all = [...HM_WORDS[1], ...HM_WORDS[2], ...HM_WORDS[3]];
+  const unique = new Set(all);
+  assert.strictEqual(all.length, unique.size);
 });
 
 // ─── Summary ─────────────────────────────────────────────────────────────────
