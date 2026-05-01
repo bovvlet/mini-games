@@ -40,11 +40,7 @@
   .screen { display: none; flex-direction: column; align-items: center; gap: 24px; }
   .screen.active { display: flex; }
 
-  .status {
-    font-size: 1.1rem;
-    color: var(--muted);
-    height: 1.5rem;
-  }
+  .status { font-size: 1.1rem; color: var(--muted); height: 1.5rem; }
   .status.win { color: var(--accent); font-weight: 600; }
 
   .btn {
@@ -119,9 +115,6 @@
     border-radius: 50%;
     cursor: pointer;
     padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: background 0.1s ease;
   }
   .c4-cell:hover:not(:disabled) { background: #2a3a52; }
@@ -131,6 +124,64 @@
   .c4-cell.win { box-shadow: 0 0 0 3px var(--accent) inset; }
 
   .controls { display: flex; gap: 8px; }
+
+  /* Win overlay */
+  #win-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 100;
+  }
+  #win-overlay.active { display: flex; }
+
+  #confetti-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .win-card {
+    position: relative;
+    z-index: 1;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 48px 56px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: pop-in 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .win-trophy {
+    font-size: 5rem;
+    line-height: 1;
+    animation: trophy-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  #win-text {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .win-buttons { display: flex; gap: 10px; }
+
+  @keyframes pop-in {
+    from { transform: scale(0.4) translateY(40px); opacity: 0; }
+    to   { transform: scale(1) translateY(0);      opacity: 1; }
+  }
+
+  @keyframes trophy-in {
+    0%   { transform: scale(0) rotate(-200deg); opacity: 0; }
+    70%  { transform: scale(1.25) rotate(15deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -138,18 +189,16 @@
 <!-- MENU -->
 <div id="menu" class="screen active">
   <h1>Mini Games</h1>
-
   <div class="menu-section">
     <h2>Tic-Tac-Toe</h2>
     <button class="btn primary" data-action="ttt-start">Play</button>
   </div>
-
   <div class="menu-section">
     <h2>4 in a Row</h2>
     <div class="menu-row">
-      <button class="btn" data-action="c4-start" data-size="10">Small 10x10</button>
-      <button class="btn" data-action="c4-start" data-size="15">Medium 15x15</button>
-      <button class="btn" data-action="c4-start" data-size="20">Big 20x20</button>
+      <button class="btn" data-action="c4-start" data-size="10">Small 10×10</button>
+      <button class="btn" data-action="c4-start" data-size="15">Medium 15×15</button>
+      <button class="btn" data-action="c4-start" data-size="20">Big 20×20</button>
     </div>
   </div>
 </div>
@@ -176,7 +225,21 @@
   </div>
 </div>
 
+<!-- WIN OVERLAY -->
+<div id="win-overlay">
+  <canvas id="confetti-canvas"></canvas>
+  <div class="win-card">
+    <div class="win-trophy">🏆</div>
+    <div id="win-text">Player wins!</div>
+    <div class="win-buttons">
+      <button class="btn primary" data-action="play-again">Play Again</button>
+      <button class="btn" data-action="menu">Menu</button>
+    </div>
+  </div>
+</div>
+
 <script>
+  // ---------- Screens ----------
   const screens = {
     menu: document.getElementById('menu'),
     ttt: document.getElementById('ttt'),
@@ -186,6 +249,81 @@
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
     screens[name].classList.add('active');
+  }
+
+  // ---------- Confetti ----------
+  const overlay = document.getElementById('win-overlay');
+  const winText = document.getElementById('win-text');
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
+  let confettiParticles = [];
+  let confettiAnimId = null;
+  let playAgainCallback = null;
+
+  const COLORS = ['#38bdf8','#f472b6','#fbbf24','#22c55e','#a78bfa','#fb923c','#34d399','#f87171'];
+
+  function startConfetti() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+    confettiParticles = Array.from({ length: 180 }, () => ({
+      x: Math.random() * confettiCanvas.width,
+      y: -20 - Math.random() * 300,
+      vx: (Math.random() - 0.5) * 4,
+      vy: 2.5 + Math.random() * 3.5,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      w: 7 + Math.random() * 9,
+      h: 3 + Math.random() * 5,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() - 0.5) * 0.18,
+      shape: Math.random() < 0.4 ? 'circle' : 'rect',
+    }));
+    if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+    loopConfetti();
+  }
+
+  function loopConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    for (const p of confettiParticles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.rotV;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      }
+      ctx.restore();
+      if (p.y > confettiCanvas.height + 20) {
+        p.y = -20;
+        p.x = Math.random() * confettiCanvas.width;
+      }
+    }
+    confettiAnimId = requestAnimationFrame(loopConfetti);
+  }
+
+  function stopConfetti() {
+    if (confettiAnimId) { cancelAnimationFrame(confettiAnimId); confettiAnimId = null; }
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+
+  function showWinOverlay(text, color, onPlayAgain) {
+    winText.textContent = text;
+    winText.style.color = color;
+    playAgainCallback = onPlayAgain;
+    overlay.classList.add('active');
+    startConfetti();
+  }
+
+  function hideWinOverlay() {
+    overlay.classList.remove('active');
+    stopConfetti();
+    playAgainCallback = null;
   }
 
   // ---------- Tic-Tac-Toe ----------
@@ -239,9 +377,8 @@
 
     checkWinner() {
       for (const [a, b, c] of TTT_LINES) {
-        if (this.state[a] && this.state[a] === this.state[b] && this.state[a] === this.state[c]) {
+        if (this.state[a] && this.state[a] === this.state[b] && this.state[a] === this.state[c])
           return { winner: this.state[a], line: [a, b, c] };
-        }
       }
       if (this.state.every(v => v !== '')) return { winner: 'draw' };
       return null;
@@ -256,9 +393,9 @@
         if (result.winner === 'draw') {
           this.statusEl.textContent = "It's a draw";
         } else {
-          this.statusEl.textContent = `${result.winner} wins!`;
-          this.statusEl.classList.add('win');
           result.line.forEach(idx => this.cells[idx].classList.add('win'));
+          const color = result.winner === 'X' ? 'var(--x)' : 'var(--o)';
+          showWinOverlay(`${result.winner} wins!`, color, () => { this.reset(); });
         }
       } else {
         this.current = this.current === 'X' ? 'O' : 'X';
@@ -271,20 +408,17 @@
   ttt.build();
   ttt.reset();
 
-  // ---------- Connect Four (4-in-a-row) ----------
+  // ---------- Connect Four ----------
   const C4_DIRS = [
-    [0, 1],   // horizontal
-    [1, 0],   // vertical
-    [1, 1],   // diag down-right
-    [1, -1],  // diag down-left
+    [0, 1], [1, 0], [1, 1], [1, -1],
   ];
 
   const c4 = {
     boardEl: document.getElementById('c4-board'),
     statusEl: document.getElementById('c4-status'),
     size: 10,
-    cells: [],     // 2D: cells[r][c]
-    state: [],     // 2D: state[r][c] = '' | 'p1' | 'p2'
+    cells: [],
+    state: [],
     current: 'p1',
     gameOver: false,
 
@@ -330,19 +464,19 @@
 
     dropInColumn(col) {
       if (this.gameOver) return;
-      // gravity: lowest empty row (largest index)
       let row = -1;
       for (let r = this.size - 1; r >= 0; r--) {
         if (this.state[r][col] === '') { row = r; break; }
       }
-      if (row === -1) return; // column full
+      if (row === -1) return;
       this.state[row][col] = this.current;
       const winLine = this.checkWinFrom(row, col);
       if (winLine) {
         this.gameOver = true;
-        this.statusEl.textContent = `${this.label(this.current)} wins!`;
-        this.statusEl.classList.add('win');
         winLine.forEach(([r, c]) => this.cells[r][c].classList.add('win'));
+        const color = this.current === 'p1' ? 'var(--p1)' : 'var(--p2)';
+        const size = this.size;
+        showWinOverlay(`${this.label(this.current)} wins!`, color, () => { this.start(size); });
       } else if (this.isBoardFull()) {
         this.gameOver = true;
         this.statusEl.textContent = "It's a draw";
@@ -365,8 +499,7 @@
           let rr = r + dr * sign, cc = c + dc * sign;
           while (rr >= 0 && rr < this.size && cc >= 0 && cc < this.size && this.state[rr][cc] === p) {
             line.push([rr, cc]);
-            rr += dr * sign;
-            cc += dc * sign;
+            rr += dr * sign; cc += dc * sign;
           }
         }
         if (line.length >= 4) return line;
@@ -381,15 +514,12 @@
           cell.classList.remove('p1', 'p2');
           const v = this.state[r][c];
           if (v) cell.classList.add(v);
-          // Disable filled cells; column-full check happens in dropInColumn
           cell.disabled = this.gameOver || v !== '';
         }
       }
     },
 
-    reset() {
-      this.start(this.size);
-    },
+    reset() { this.start(this.size); },
   };
 
   // ---------- Navigation ----------
@@ -397,7 +527,8 @@
     const target = e.target.closest('[data-action]');
     if (!target) return;
     const action = target.dataset.action;
-    if (action === 'menu') showScreen('menu');
+    if (action === 'menu') { hideWinOverlay(); showScreen('menu'); }
+    else if (action === 'play-again') { hideWinOverlay(); if (playAgainCallback) playAgainCallback(); }
     else if (action === 'ttt-start') { ttt.reset(); showScreen('ttt'); }
     else if (action === 'ttt-reset') ttt.reset();
     else if (action === 'c4-start') { c4.start(parseInt(target.dataset.size, 10)); showScreen('c4'); }
