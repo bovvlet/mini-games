@@ -158,6 +158,14 @@
   .c4-cell.p2 { background: var(--p2); }
   .c4-cell.win { box-shadow: 0 0 0 3px var(--accent) inset; }
 
+  @keyframes c4-fall {
+    0%   { transform: translateY(var(--fall-from)); animation-timing-function: ease-in; }
+    68%  { transform: translateY(7px);              animation-timing-function: ease-out; }
+    82%  { transform: translateY(-4px);             animation-timing-function: ease-in; }
+    93%  { transform: translateY(2px);              animation-timing-function: ease-out; }
+    100% { transform: translateY(0); }
+  }
+
   .controls { display: flex; gap: 8px; }
 
   /* Win overlay */
@@ -550,16 +558,30 @@
         this.current = this.current === 'p1' ? 'p2' : 'p1';
         this.statusEl.textContent = `${this.label(this.current)}'s turn`;
       }
+      this.animateDrop(row, col);
       this.render();
+    },
+
+    // All pieces start from 1 cell-height above the board top.
+    // fallFrom = px*(row+1.5) + row*3 + 6  →  constant start Y for all pieces.
+    animateDrop(row, col) {
+      const px = this.cellSize();
+      const fallFrom = Math.round(px * (row + 1.5) + row * 3 + 6);
+      const duration = Math.min(0.55, 0.2 + row * 0.034);
+      const cell = this.cells[row][col];
+      cell.style.setProperty('--fall-from', `-${fallFrom}px`);
+      cell.style.animation = 'none';
+      void cell.offsetHeight; // force reflow to restart animation
+      cell.style.animation = `c4-fall ${duration}s linear both`;
     },
 
     render() {
       for (let r = 0; r < this.size; r++) {
         for (let c = 0; c < this.size; c++) {
           const cell = this.cells[r][c];
-          cell.classList.remove('p1', 'p2');
           const v = this.state[r][c];
-          if (v) cell.classList.add(v);
+          // Only add class on new placements — removing/re-adding would restart animation
+          if (v && !cell.classList.contains(v)) cell.classList.add(v);
           cell.disabled = this.gameOver || v !== '';
         }
       }
