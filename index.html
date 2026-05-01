@@ -114,9 +114,9 @@
     stroke-dasharray: 214;
     stroke-dashoffset: 214;
   }
-  .ttt-x-s1 { animation: ttt-draw-x 0.28s ease-out both; }
-  .ttt-x-s2 { animation: ttt-draw-x 0.28s ease-out 0.22s both; }
-  .ttt-o-s1 { animation: ttt-draw-o 0.42s ease-out both; }
+  .ttt-x-s1 { animation: ttt-draw-x 0.13s ease-out both; }
+  .ttt-x-s2 { animation: ttt-draw-x 0.13s ease-out 0.10s both; }
+  .ttt-o-s1 { animation: ttt-draw-o 0.18s ease-out both; }
 
   @keyframes ttt-draw-x {
     from { stroke-dashoffset: 91;  }
@@ -125,6 +125,15 @@
   @keyframes ttt-draw-o {
     from { stroke-dashoffset: 214; }
     to   { stroke-dashoffset: 0;   }
+  }
+
+  /* Win strike-through line */
+  #ttt-board-wrap { position: relative; }
+  #ttt-line-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 324px; height: 324px;
+    pointer-events: none;
   }
 
   /* Connect Four */
@@ -233,7 +242,10 @@
 <div id="ttt" class="screen">
   <h1>Tic-Tac-Toe</h1>
   <div id="ttt-status" class="status">X's turn</div>
-  <div id="ttt-board" role="grid" aria-label="Tic-tac-toe board"></div>
+  <div id="ttt-board-wrap">
+    <div id="ttt-board" role="grid" aria-label="Tic-tac-toe board"></div>
+    <svg id="ttt-line-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
   <div class="controls">
     <button class="btn" data-action="ttt-reset">New game</button>
     <button class="btn" data-action="menu">Menu</button>
@@ -353,6 +365,37 @@
     playAgainCallback = null;
   }
 
+  // Board geometry: padding 6px, cell 100px, gap 6px → cell pitch = 106px
+  function tttCellCenter(i) {
+    const r = Math.floor(i / 3), c = i % 3;
+    return [6 + c * 106 + 50, 6 + r * 106 + 50];
+  }
+
+  function drawTTTWinLine(line, color, onDone) {
+    const [x1, y1] = tttCellCenter(line[0]);
+    const [x2, y2] = tttCellCenter(line[2]);
+    const len = Math.hypot(x2 - x1, y2 - y1);
+    const svg = document.getElementById('ttt-line-svg');
+    svg.innerHTML = '';
+    svg.style.filter = `drop-shadow(0 0 7px ${color})`;
+    const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+    el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+    el.setAttribute('stroke', color);
+    el.setAttribute('stroke-width', '6');
+    el.setAttribute('stroke-linecap', 'round');
+    el.setAttribute('stroke-dasharray', len);
+    el.setAttribute('stroke-dashoffset', len);
+    el.style.transition = 'stroke-dashoffset 0.28s ease-out';
+    svg.appendChild(el);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.setAttribute('stroke-dashoffset', '0');
+        setTimeout(onDone, 560); // 280ms draw + 280ms pause
+      });
+    });
+  }
+
   function tttMarkHTML(mark) {
     if (mark === 'X') return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <line class="ttt-stroke ttt-x-s1" x1="18" y1="18" x2="82" y2="82"/>
@@ -395,6 +438,8 @@
       this.statusEl.textContent = "X's turn";
       this.statusEl.classList.remove('win');
       this.cells.forEach(c => { c.classList.remove('win'); c.innerHTML = ''; });
+      const lineSvg = document.getElementById('ttt-line-svg');
+      lineSvg.innerHTML = ''; lineSvg.style.filter = '';
       this.render();
     },
 
@@ -417,8 +462,11 @@
           this.statusEl.textContent = "It's a draw";
         } else {
           result.line.forEach(idx => this.cells[idx].classList.add('win'));
-          const color = result.winner === 'X' ? 'var(--x)' : 'var(--o)';
-          showWinOverlay(`${result.winner} wins!`, color, () => { this.reset(); });
+          const winner = result.winner;
+          const color = winner === 'X' ? '#38bdf8' : '#f472b6';
+          drawTTTWinLine(result.line, color, () => {
+            showWinOverlay(`${winner} wins!`, color, () => { this.reset(); });
+          });
         }
       } else {
         this.current = this.current === 'X' ? 'O' : 'X';
