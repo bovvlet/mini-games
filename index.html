@@ -101,6 +101,32 @@
   .ttt-cell.o { color: var(--o); }
   .ttt-cell.win { background: #14532d; }
 
+  /* SVG draw-on animation */
+  .ttt-cell svg { width: 68%; height: 68%; overflow: visible; pointer-events: none; }
+  .ttt-stroke   { fill: none; stroke-linecap: round; stroke-width: 10; }
+  .ttt-x-s1, .ttt-x-s2 {
+    stroke: var(--x);
+    stroke-dasharray: 91;
+    stroke-dashoffset: 91;
+  }
+  .ttt-o-s1 {
+    stroke: var(--o);
+    stroke-dasharray: 214;
+    stroke-dashoffset: 214;
+  }
+  .ttt-x-s1 { animation: ttt-draw-x 0.28s ease-out both; }
+  .ttt-x-s2 { animation: ttt-draw-x 0.28s ease-out 0.22s both; }
+  .ttt-o-s1 { animation: ttt-draw-o 0.42s ease-out both; }
+
+  @keyframes ttt-draw-x {
+    from { stroke-dashoffset: 91;  }
+    to   { stroke-dashoffset: 0;   }
+  }
+  @keyframes ttt-draw-o {
+    from { stroke-dashoffset: 214; }
+    to   { stroke-dashoffset: 0;   }
+  }
+
   /* Connect Four */
   #c4-board {
     display: grid;
@@ -327,6 +353,17 @@
     playAgainCallback = null;
   }
 
+  function tttMarkHTML(mark) {
+    if (mark === 'X') return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <line class="ttt-stroke ttt-x-s1" x1="18" y1="18" x2="82" y2="82"/>
+      <line class="ttt-stroke ttt-x-s2" x1="82" y1="18" x2="18" y2="82"/>
+    </svg>`;
+    // O starts at 12-o'clock via rotate(-90)
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle class="ttt-stroke ttt-o-s1" cx="50" cy="50" r="34" transform="rotate(-90 50 50)"/>
+    </svg>`;
+  }
+
   // ---------- Tic-Tac-Toe ----------
 
   const ttt = {
@@ -357,16 +394,15 @@
       this.gameOver = false;
       this.statusEl.textContent = "X's turn";
       this.statusEl.classList.remove('win');
-      this.cells.forEach(c => c.classList.remove('win'));
+      this.cells.forEach(c => { c.classList.remove('win'); c.innerHTML = ''; });
       this.render();
     },
 
     render() {
       this.cells.forEach((cell, i) => {
-        cell.textContent = this.state[i];
-        cell.classList.remove('x', 'o');
-        if (this.state[i] === 'X') cell.classList.add('x');
-        if (this.state[i] === 'O') cell.classList.add('o');
+        if (this.state[i] && cell.innerHTML === '') {
+          cell.innerHTML = tttMarkHTML(this.state[i]);
+        }
         cell.disabled = this.gameOver || this.state[i] !== '';
       });
     },
