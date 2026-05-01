@@ -238,6 +238,7 @@
   </div>
 </div>
 
+<script src="game-logic.js"></script>
 <script>
   // ---------- Screens ----------
   const screens = {
@@ -327,11 +328,6 @@
   }
 
   // ---------- Tic-Tac-Toe ----------
-  const TTT_LINES = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6],
-  ];
 
   const ttt = {
     boardEl: document.getElementById('ttt-board'),
@@ -375,19 +371,10 @@
       });
     },
 
-    checkWinner() {
-      for (const [a, b, c] of TTT_LINES) {
-        if (this.state[a] && this.state[a] === this.state[b] && this.state[a] === this.state[c])
-          return { winner: this.state[a], line: [a, b, c] };
-      }
-      if (this.state.every(v => v !== '')) return { winner: 'draw' };
-      return null;
-    },
-
     click(i) {
       if (this.gameOver || this.state[i]) return;
       this.state[i] = this.current;
-      const result = this.checkWinner();
+      const result = checkTTTWinner(this.state);
       if (result) {
         this.gameOver = true;
         if (result.winner === 'draw') {
@@ -409,9 +396,6 @@
   ttt.reset();
 
   // ---------- Connect Four ----------
-  const C4_DIRS = [
-    [0, 1], [1, 0], [1, 1], [1, -1],
-  ];
 
   const c4 = {
     boardEl: document.getElementById('c4-board'),
@@ -432,7 +416,7 @@
 
     start(size) {
       this.size = size;
-      this.state = Array.from({ length: size }, () => Array(size).fill(''));
+      this.state = makeC4Board(size);
       this.current = 'p1';
       this.gameOver = false;
       this.statusEl.textContent = "Red's turn";
@@ -464,20 +448,18 @@
 
     dropInColumn(col) {
       if (this.gameOver) return;
-      let row = -1;
-      for (let r = this.size - 1; r >= 0; r--) {
-        if (this.state[r][col] === '') { row = r; break; }
-      }
-      if (row === -1) return;
-      this.state[row][col] = this.current;
-      const winLine = this.checkWinFrom(row, col);
+      const result = c4Drop(this.state, this.size, col, this.current);
+      if (!result) return;
+      this.state = result.state;
+      const { row } = result;
+      const winLine = checkC4WinFrom(this.state, this.size, row, col);
       if (winLine) {
         this.gameOver = true;
         winLine.forEach(([r, c]) => this.cells[r][c].classList.add('win'));
         const color = this.current === 'p1' ? 'var(--p1)' : 'var(--p2)';
         const size = this.size;
         showWinOverlay(`${this.label(this.current)} wins!`, color, () => { this.start(size); });
-      } else if (this.isBoardFull()) {
+      } else if (isC4BoardFull(this.state)) {
         this.gameOver = true;
         this.statusEl.textContent = "It's a draw";
       } else {
@@ -485,26 +467,6 @@
         this.statusEl.textContent = `${this.label(this.current)}'s turn`;
       }
       this.render();
-    },
-
-    isBoardFull() {
-      return this.state.every(row => row.every(v => v !== ''));
-    },
-
-    checkWinFrom(r, c) {
-      const p = this.state[r][c];
-      for (const [dr, dc] of C4_DIRS) {
-        const line = [[r, c]];
-        for (const sign of [-1, 1]) {
-          let rr = r + dr * sign, cc = c + dc * sign;
-          while (rr >= 0 && rr < this.size && cc >= 0 && cc < this.size && this.state[rr][cc] === p) {
-            line.push([rr, cc]);
-            rr += dr * sign; cc += dc * sign;
-          }
-        }
-        if (line.length >= 4) return line;
-      }
-      return null;
     },
 
     render() {
