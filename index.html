@@ -515,7 +515,7 @@
           <circle cx="101" cy="73"  r="11" fill="#fbbf24"/>
         </svg>
       </div>
-      <!-- Screenshot 2: 4-in-a-row win -->
+      <!-- Screenshot 2: 4-in-a-row win (gravity-valid — all pieces stack from bottom) -->
       <div class="screenshot">
         <svg viewBox="0 0 196 148" xmlns="http://www.w3.org/2000/svg">
           <rect width="196" height="148" fill="#0f172a"/>
@@ -523,30 +523,34 @@
           <defs><filter id="glow-c4"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
           <!-- empty cells -->
           <g fill="#0f172a">
-            <circle cx="17" cy="17"  r="11"/><circle cx="45" cy="17"  r="11"/><circle cx="73" cy="17"  r="11"/>
+            <!-- row 0 (top): all 7 cols -->
+            <circle cx="17"  cy="17" r="11"/><circle cx="45"  cy="17" r="11"/><circle cx="73"  cy="17" r="11"/>
             <circle cx="101" cy="17" r="11"/><circle cx="129" cy="17" r="11"/><circle cx="157" cy="17" r="11"/><circle cx="185" cy="17" r="11"/>
-            <circle cx="17" cy="45"  r="11"/><circle cx="45" cy="45"  r="11"/><circle cx="73" cy="45"  r="11"/>
+            <!-- row 1: all 7 cols -->
+            <circle cx="17"  cy="45" r="11"/><circle cx="45"  cy="45" r="11"/><circle cx="73"  cy="45" r="11"/>
             <circle cx="101" cy="45" r="11"/><circle cx="129" cy="45" r="11"/><circle cx="157" cy="45" r="11"/><circle cx="185" cy="45" r="11"/>
-            <circle cx="17" cy="73"  r="11"/>
-            <circle cx="129" cy="73" r="11"/><circle cx="157" cy="73" r="11"/><circle cx="185" cy="73" r="11"/>
-            <circle cx="17" cy="101" r="11"/><circle cx="157" cy="101" r="11"/><circle cx="185" cy="101" r="11"/>
-            <circle cx="17" cy="129" r="11"/><circle cx="157" cy="129" r="11"/><circle cx="185" cy="129" r="11"/>
+            <!-- row 2: cols 0,1,4,5,6 -->
+            <circle cx="17"  cy="73" r="11"/><circle cx="45"  cy="73" r="11"/><circle cx="129" cy="73" r="11"/><circle cx="157" cy="73" r="11"/><circle cx="185" cy="73" r="11"/>
+            <!-- row 3: cols 5,6 -->
+            <circle cx="157" cy="101" r="11"/><circle cx="185" cy="101" r="11"/>
+            <!-- row 4 (bottom): col 6 -->
+            <circle cx="185" cy="129" r="11"/>
           </g>
-          <!-- support pieces -->
-          <circle cx="45"  cy="73"  r="11" fill="#ef4444"/>
+          <!-- support pieces (stacked from bottom, no gaps) -->
+          <circle cx="17"  cy="129" r="11" fill="#ef4444"/>
+          <circle cx="17"  cy="101" r="11" fill="#ef4444"/>
+          <circle cx="45"  cy="101" r="11" fill="#ef4444"/>
           <circle cx="73"  cy="73"  r="11" fill="#fbbf24"/>
-          <circle cx="45"  cy="101" r="11" fill="#fbbf24"/>
           <circle cx="73"  cy="101" r="11" fill="#ef4444"/>
+          <circle cx="101" cy="73"  r="11" fill="#ef4444"/>
           <circle cx="101" cy="101" r="11" fill="#fbbf24"/>
-          <circle cx="45"  cy="129" r="11" fill="#ef4444"/>
-          <circle cx="73"  cy="129" r="11" fill="#ef4444"/>
-          <circle cx="101" cy="129" r="11" fill="#fbbf24"/>
-          <circle cx="129" cy="129" r="11" fill="#ef4444"/>
-          <!-- 4-in-a-row: yellow at row1 cols 1-4 (y=45) with glow -->
-          <circle cx="45"  cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
-          <circle cx="73"  cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
-          <circle cx="101" cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
-          <circle cx="129" cy="45" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+          <circle cx="129" cy="101" r="11" fill="#ef4444"/>
+          <circle cx="157" cy="129" r="11" fill="#ef4444"/>
+          <!-- 4-in-a-row: yellow at bottom row cols 1–4, with glow -->
+          <circle cx="45"  cy="129" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+          <circle cx="73"  cy="129" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+          <circle cx="101" cy="129" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
+          <circle cx="129" cy="129" r="11" fill="#fbbf24" filter="url(#glow-c4)"/>
         </svg>
       </div>
     </div>
