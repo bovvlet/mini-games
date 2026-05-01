@@ -574,7 +574,7 @@
     if (!target) return;
     const action = target.dataset.action;
     if (action === 'menu') { hideWinOverlay(); showScreen('menu'); }
-    else if (action === 'play-again') { hideWinOverlay(); if (playAgainCallback) playAgainCallback(); }
+    else if (action === 'play-again') { const cb = playAgainCallback; hideWinOverlay(); if (cb) cb(); }
     else if (action === 'ttt-start') { ttt.reset(); showScreen('ttt'); }
     else if (action === 'ttt-reset') ttt.reset();
     else if (action === 'c4-start') { c4.start(parseInt(target.dataset.size, 10)); showScreen('c4'); }
