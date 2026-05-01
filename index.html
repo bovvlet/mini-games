@@ -271,6 +271,40 @@
     100% { transform: translateY(0); }
   }
 
+  /* ── Dots & Boxes config ── */
+  .type-options { display: flex; gap: 12px; }
+  .type-card {
+    flex: 1;
+    background: var(--panel);
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .type-card:hover { background: #253347; border-color: var(--x); transform: translateY(-2px); }
+  .type-card svg { display: block; }
+  .type-label { font-size: 0.9rem; font-weight: 600; }
+  .size-preview[data-db-size="3"] { background-size: 19px 19px; }
+  .size-preview[data-db-size="4"] { background-size: 14px 14px; }
+  .size-preview[data-db-size="5"] { background-size: 11px 11px; }
+
+  /* ── Dots & Boxes game board ── */
+  #db-board {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  #db-board svg { touch-action: none; }
+  #db-status-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  #db-score { font-size: 0.85rem; color: var(--muted); }
+
   /* ── Win overlay ── */
   #win-overlay {
     position: fixed; inset: 0;
@@ -362,6 +396,33 @@
         <circle cx="49" cy="49" r="5" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
       </svg>
       <span class="game-card-name">4 in a Row</span>
+    </button>
+
+
+    <button class="game-card" data-action="go-db-detail">
+      <svg class="game-card-icon" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- dots -->
+        <circle cx="8"  cy="8"  r="3" fill="#94a3b8"/>
+        <circle cx="28" cy="8"  r="3" fill="#94a3b8"/>
+        <circle cx="48" cy="8"  r="3" fill="#94a3b8"/>
+        <circle cx="8"  cy="28" r="3" fill="#94a3b8"/>
+        <circle cx="28" cy="28" r="3" fill="#94a3b8"/>
+        <circle cx="48" cy="28" r="3" fill="#94a3b8"/>
+        <circle cx="8"  cy="48" r="3" fill="#94a3b8"/>
+        <circle cx="28" cy="48" r="3" fill="#94a3b8"/>
+        <circle cx="48" cy="48" r="3" fill="#94a3b8"/>
+        <!-- borders -->
+        <rect x="8" y="8" width="40" height="40" rx="0" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- p1 (red) lines -->
+        <line x1="8"  y1="28" x2="28" y2="28" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="28" y1="8"  x2="28" y2="28" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- p2 (yellow) lines -->
+        <line x1="28" y1="28" x2="28" y2="48" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="28" y1="28" x2="48" y2="28" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- claimed box top-left -->
+        <rect x="9" y="9" width="18" height="18" fill="rgba(239,68,68,0.35)"/>
+      </svg>
+      <span class="game-card-name">Dots &amp; Boxes</span>
     </button>
 
   </div>
@@ -583,6 +644,213 @@
   </div>
 </div>
 
+<!-- ═══ DOTS & BOXES DETAIL ═══ -->
+<div id="db-detail" class="screen">
+  <div class="detail-wrap">
+    <button class="back-btn" data-action="menu">&#8592; Back</button>
+    <div class="detail-top">
+      <svg class="detail-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="18" fill="#1e293b"/>
+        <circle cx="10" cy="10" r="3.5" fill="#94a3b8"/><circle cx="40" cy="10" r="3.5" fill="#94a3b8"/><circle cx="70" cy="10" r="3.5" fill="#94a3b8"/>
+        <circle cx="10" cy="40" r="3.5" fill="#94a3b8"/><circle cx="40" cy="40" r="3.5" fill="#94a3b8"/><circle cx="70" cy="40" r="3.5" fill="#94a3b8"/>
+        <circle cx="10" cy="70" r="3.5" fill="#94a3b8"/><circle cx="40" cy="70" r="3.5" fill="#94a3b8"/><circle cx="70" cy="70" r="3.5" fill="#94a3b8"/>
+        <rect x="10" y="10" width="60" height="60" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+        <line x1="10" y1="40" x2="40" y2="40" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+        <line x1="40" y1="10" x2="40" y2="40" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+        <line x1="40" y1="40" x2="40" y2="70" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+        <line x1="40" y1="40" x2="70" y2="40" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+        <rect x="11" y="11" width="28" height="28" fill="rgba(239,68,68,0.35)"/>
+        <rect x="41" y="41" width="28" height="28" fill="rgba(251,191,36,0.35)"/>
+      </svg>
+      <div class="detail-meta">
+        <h1 class="detail-title">Dots &amp; Boxes</h1>
+        <div class="detail-tags">
+          <span class="tag">2 Players</span>
+          <span class="tag">Strategy</span>
+          <span class="tag">3 Grid Types</span>
+        </div>
+      </div>
+    </div>
+    <p class="detail-desc">Take turns drawing lines between dots. Complete a box to claim it and earn a free turn. The player with the most boxes wins. Play on a square, triangular, or rhombus grid — borders are pre-drawn.</p>
+    <div class="screenshots">
+      <!-- Screenshot 1: square 3×3 mid-game -->
+      <div class="screenshot">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#0f172a"/>
+          <rect x="3" y="3" width="194" height="194" rx="8" fill="#1e293b"/>
+          <!-- claimed boxes -->
+          <rect x="17" y="17" width="55" height="55" fill="rgba(239,68,68,0.35)"/>
+          <rect x="17" y="73" width="55" height="55" fill="rgba(251,191,36,0.35)"/>
+          <!-- border lines -->
+          <g stroke="#475569" stroke-width="2.5" stroke-linecap="round">
+            <line x1="17" y1="17" x2="72" y2="17"/><line x1="72" y1="17" x2="127" y2="17"/><line x1="127" y1="17" x2="183" y2="17"/>
+            <line x1="17" y1="183" x2="72" y2="183"/><line x1="72" y1="183" x2="127" y2="183"/><line x1="127" y1="183" x2="183" y2="183"/>
+            <line x1="17" y1="17" x2="17" y2="72"/><line x1="17" y1="72" x2="17" y2="128"/><line x1="17" y1="128" x2="17" y2="183"/>
+            <line x1="183" y1="17" x2="183" y2="72"/><line x1="183" y1="72" x2="183" y2="128"/><line x1="183" y1="128" x2="183" y2="183"/>
+          </g>
+          <!-- drawn inner lines -->
+          <line x1="17" y1="72" x2="72" y2="72" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="72" y1="17" x2="72" y2="72" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="17" y1="128" x2="72" y2="128" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="72" y1="72" x2="72" y2="128" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="72" y1="72" x2="127" y2="72" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- faint undrawn inner lines -->
+          <g stroke="#283a52" stroke-width="2" stroke-linecap="round">
+            <line x1="127" y1="72" x2="183" y2="72"/>
+            <line x1="17" y1="128" x2="72" y2="128"/>
+            <line x1="72" y1="128" x2="127" y2="128"/><line x1="127" y1="128" x2="183" y2="128"/>
+            <line x1="127" y1="17" x2="127" y2="72"/><line x1="127" y1="72" x2="127" y2="128"/><line x1="127" y1="128" x2="127" y2="183"/>
+            <line x1="72" y1="128" x2="72" y2="183"/>
+          </g>
+          <!-- dots -->
+          <g fill="#e2e8f0">
+            <circle cx="17"  cy="17"  r="3.5"/><circle cx="72"  cy="17"  r="3.5"/><circle cx="127" cy="17"  r="3.5"/><circle cx="183" cy="17"  r="3.5"/>
+            <circle cx="17"  cy="72"  r="3.5"/><circle cx="72"  cy="72"  r="3.5"/><circle cx="127" cy="72"  r="3.5"/><circle cx="183" cy="72"  r="3.5"/>
+            <circle cx="17"  cy="128" r="3.5"/><circle cx="72"  cy="128" r="3.5"/><circle cx="127" cy="128" r="3.5"/><circle cx="183" cy="128" r="3.5"/>
+            <circle cx="17"  cy="183" r="3.5"/><circle cx="72"  cy="183" r="3.5"/><circle cx="127" cy="183" r="3.5"/><circle cx="183" cy="183" r="3.5"/>
+          </g>
+        </svg>
+      </div>
+      <!-- Screenshot 2: triangle n=3 mid-game -->
+      <div class="screenshot">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#0f172a"/>
+          <rect x="3" y="3" width="194" height="194" rx="8" fill="#1e293b"/>
+          <!-- claimed triangles -->
+          <!-- upT[0][0] = p1: dots (0,0)(1,0)(1,1) = (100,16)(72,65)(128,65) -->
+          <polygon points="100,16 72,65 128,65" fill="rgba(239,68,68,0.35)"/>
+          <!-- dnT[1][0] = p2: dots (1,0)(1,1)(2,1) = (72,65)(128,65)(100,113) -->
+          <polygon points="72,65 128,65 100,113" fill="rgba(251,191,36,0.35)"/>
+          <!-- upT[1][0] = p2: dots (1,0)(2,0)(2,1) = (72,65)(44,113)(100,113) -->
+          <polygon points="72,65 44,113 100,113" fill="rgba(251,191,36,0.35)"/>
+          <!-- border lines -->
+          <g stroke="#475569" stroke-width="2.5" stroke-linecap="round">
+            <line x1="100" y1="16" x2="72"  y2="65"/><line x1="72"  y1="65" x2="44"  y2="113"/>
+            <line x1="44"  y1="113" x2="16" y2="162"/>
+            <line x1="100" y1="16" x2="128" y2="65"/><line x1="128" y1="65" x2="156" y2="113"/>
+            <line x1="156" y1="113" x2="184" y2="162"/>
+            <line x1="16"  y1="162" x2="72" y2="162"/><line x1="72"  y1="162" x2="128" y2="162"/><line x1="128" y1="162" x2="184" y2="162"/>
+          </g>
+          <!-- drawn inner lines -->
+          <line x1="72" y1="65"  x2="128" y2="65"  stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="72" y1="65"  x2="100" y2="113" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="128" y1="65" x2="100" y2="113" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="44"  y1="113" x2="100" y2="113" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- faint undrawn inner lines -->
+          <g stroke="#283a52" stroke-width="2" stroke-linecap="round">
+            <line x1="100" y1="113" x2="156" y2="113"/>
+            <line x1="100" y1="113" x2="72"  y2="162"/>
+            <line x1="100" y1="113" x2="128" y2="162"/>
+            <line x1="156" y1="113" x2="128" y2="162"/>
+          </g>
+          <!-- dots -->
+          <g fill="#e2e8f0">
+            <circle cx="100" cy="16"  r="3.5"/>
+            <circle cx="72"  cy="65"  r="3.5"/><circle cx="128" cy="65"  r="3.5"/>
+            <circle cx="44"  cy="113" r="3.5"/><circle cx="100" cy="113" r="3.5"/><circle cx="156" cy="113" r="3.5"/>
+            <circle cx="16"  cy="162" r="3.5"/><circle cx="72"  cy="162" r="3.5"/><circle cx="128" cy="162" r="3.5"/><circle cx="184" cy="162" r="3.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <button class="play-btn" data-action="go-db-config">Play</button>
+  </div>
+</div>
+
+<!-- ═══ DOTS & BOXES CONFIG: GRID TYPE ═══ -->
+<div id="db-config" class="screen">
+  <div class="config-wrap">
+    <button class="back-btn" data-action="go-db-detail">&#8592; Back</button>
+    <h1>Choose Grid</h1>
+    <div class="type-options">
+
+      <button class="type-card" data-action="db-type" data-type="square">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#94a3b8">
+            <circle cx="8"  cy="8"  r="3"/><circle cx="26" cy="8"  r="3"/><circle cx="44" cy="8"  r="3"/>
+            <circle cx="8"  cy="26" r="3"/><circle cx="26" cy="26" r="3"/><circle cx="44" cy="26" r="3"/>
+            <circle cx="8"  cy="44" r="3"/><circle cx="26" cy="44" r="3"/><circle cx="44" cy="44" r="3"/>
+          </g>
+          <rect x="8" y="8" width="36" height="36" fill="none" stroke="#475569" stroke-width="2.5"/>
+          <line x1="8" y1="26" x2="44" y2="26" stroke="#334155" stroke-width="2" stroke-dasharray="3 3"/>
+          <line x1="26" y1="8" x2="26" y2="44" stroke="#334155" stroke-width="2" stroke-dasharray="3 3"/>
+        </svg>
+        <span class="type-label">Square</span>
+      </button>
+
+      <button class="type-card" data-action="db-type" data-type="triangle">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#94a3b8">
+            <circle cx="26" cy="6"  r="3"/>
+            <circle cx="13" cy="28" r="3"/><circle cx="39" cy="28" r="3"/>
+            <circle cx="4"  cy="46" r="3"/><circle cx="26" cy="46" r="3"/><circle cx="48" cy="46" r="3"/>
+          </g>
+          <line x1="26" y1="6"  x2="4"  y2="46" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="26" y1="6"  x2="48" y2="46" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="4"  y1="46" x2="48" y2="46" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="13" y1="28" x2="39" y2="28" stroke="#334155" stroke-width="2" stroke-dasharray="3 3"/>
+          <line x1="26" y1="6"  x2="26" y2="46" stroke="#334155" stroke-width="2" stroke-dasharray="3 3"/>
+        </svg>
+        <span class="type-label">Triangle</span>
+      </button>
+
+      <button class="type-card" data-action="db-type" data-type="rhombus">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#94a3b8">
+            <circle cx="8"  cy="8"  r="3"/><circle cx="28" cy="8"  r="3"/><circle cx="48" cy="8"  r="3"/>
+            <circle cx="18" cy="26" r="3"/><circle cx="38" cy="26" r="3"/><circle cx="58" cy="26" r="3"/>
+            <circle cx="28" cy="44" r="3"/><circle cx="48" cy="44" r="3"/><circle cx="68" cy="44" r="3"/>
+          </g>
+          <polygon points="8,8 28,8 48,26 28,26" fill="none" stroke="#475569" stroke-width="2.5" stroke-linejoin="round"/>
+          <line x1="28" y1="8"  x2="38" y2="26" stroke="#334155" stroke-width="2" stroke-dasharray="3 3"/>
+          <line x1="8"  y1="8"  x2="38" y2="26" stroke="#334155" stroke-width="2" stroke-dasharray="3 3"/>
+        </svg>
+        <span class="type-label">Rhombus</span>
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DOTS & BOXES CONFIG: SIZE ═══ -->
+<div id="db-size" class="screen">
+  <div class="config-wrap">
+    <button class="back-btn" data-action="go-db-config">&#8592; Back</button>
+    <h1>Choose Size</h1>
+    <div class="size-options">
+      <button class="size-card" data-action="db-start" data-size="3">
+        <div class="size-preview" data-db-size="3"></div>
+        <span class="size-label">Small</span>
+        <span class="size-dim">3 × 3</span>
+      </button>
+      <button class="size-card" data-action="db-start" data-size="4">
+        <div class="size-preview" data-db-size="4"></div>
+        <span class="size-label">Medium</span>
+        <span class="size-dim">4 × 4</span>
+      </button>
+      <button class="size-card" data-action="db-start" data-size="5">
+        <div class="size-preview" data-db-size="5"></div>
+        <span class="size-label">Large</span>
+        <span class="size-dim">5 × 5</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DOTS & BOXES GAME ═══ -->
+<div id="db" class="screen">
+  <h1 class="page-title">Dots &amp; Boxes</h1>
+  <div id="db-status-wrap">
+    <div id="db-status" class="status">Red's turn</div>
+    <div id="db-score"></div>
+  </div>
+  <div id="db-board"></div>
+  <div class="controls">
+    <button class="btn" data-action="db-reset">New game</button>
+    <button class="btn" data-action="menu">Menu</button>
+  </div>
+</div>
+
 <!-- ═══ TIC-TAC-TOE GAME ═══ -->
 <div id="ttt" class="screen">
   <h1 class="page-title">Tic-Tac-Toe</h1>
@@ -629,8 +897,12 @@
     'ttt-detail': document.getElementById('ttt-detail'),
     'c4-detail':  document.getElementById('c4-detail'),
     'c4-config':  document.getElementById('c4-config'),
+    'db-detail':  document.getElementById('db-detail'),
+    'db-config':  document.getElementById('db-config'),
+    'db-size':    document.getElementById('db-size'),
     ttt:          document.getElementById('ttt'),
     c4:           document.getElementById('c4'),
+    db:           document.getElementById('db'),
   };
 
   function showScreen(name) {
@@ -881,20 +1153,237 @@
     reset() { this.start(this.size); },
   };
 
+  // ── Dots & Boxes ──
+  let dbPendingType = 'square';
+
+  const db = {
+    statusEl: document.getElementById('db-status'),
+    scoreEl:  document.getElementById('db-score'),
+    boardEl:  document.getElementById('db-board'),
+    state: null, triState: null,
+    gridType: 'square', size: 3,
+    player: 'p1', lineOwner: {}, done: false,
+
+    label(p) { return p === 'p1' ? 'Red' : 'Yellow'; },
+    color(p) { return p === 'p1' ? '#ef4444' : '#fbbf24'; },
+
+    start(gridType, size) {
+      this.gridType = gridType; this.size = size;
+      this.player = 'p1'; this.lineOwner = {}; this.done = false;
+      this.triState = gridType === 'triangle' ? makeDBTriState(size) : null;
+      this.state    = gridType !== 'triangle' ? makeDBState(size)    : null;
+      this.statusEl.textContent = "Red's turn"; this.statusEl.classList.remove('win');
+      this.scoreEl.textContent = '';
+      this.renderSVG();
+    },
+
+    reset() { this.start(this.gridType, this.size); },
+
+    // Compute dot pixel position in a 320×320 SVG viewBox
+    dotPos(r, c) {
+      const n = this.size, pad = 24, W = 320;
+      if (this.gridType === 'triangle') {
+        const cs = (W - 2*pad) / n;
+        return [W/2 + (c - r/2) * cs, pad + r * cs * Math.sin(Math.PI/3)];
+      }
+      if (this.gridType === 'rhombus') {
+        const cs = (W - 2*pad) / (n * 1.5);
+        const isoY = cs * Math.sin(Math.PI/3);
+        const ox = (W - n * cs * 1.5) / 2, oy = (W - n * isoY) / 2;
+        return [ox + c * cs + r * cs * 0.5, oy + r * isoY];
+      }
+      // square
+      const cs = (W - 2*pad) / n;
+      return [pad + c * cs, pad + r * cs];
+    },
+
+    renderSVG() {
+      this.boardEl.innerHTML = '';
+      const NS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', '0 0 320 320');
+      svg.style.cssText = 'display:block;width:100%;max-width:380px;';
+      const n = this.size, isTri = this.gridType === 'triangle';
+
+      const mk = (tag, attrs) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        return e;
+      };
+
+      // ── Box fills ──
+      if (isTri) {
+        const ts = this.triState;
+        for (let l = 0; l < n; l++) {
+          for (let j = 0; j <= l; j++) {
+            if (ts.upT[l][j]) {
+              const [ax,ay] = this.dotPos(l,j), [bx,by] = this.dotPos(l+1,j), [cx,cy] = this.dotPos(l+1,j+1);
+              svg.appendChild(mk('polygon', { points:`${ax},${ay} ${bx},${by} ${cx},${cy}`,
+                fill: ts.upT[l][j]==='p1'?'rgba(239,68,68,0.3)':'rgba(251,191,36,0.3)', stroke:'none' }));
+            }
+          }
+          for (let j = 0; j < l; j++) {
+            if (ts.dnT[l][j]) {
+              const [ax,ay] = this.dotPos(l,j), [bx,by] = this.dotPos(l,j+1), [cx,cy] = this.dotPos(l+1,j+1);
+              svg.appendChild(mk('polygon', { points:`${ax},${ay} ${bx},${by} ${cx},${cy}`,
+                fill: ts.dnT[l][j]==='p1'?'rgba(239,68,68,0.3)':'rgba(251,191,36,0.3)', stroke:'none' }));
+            }
+          }
+        }
+      } else {
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            const b = this.state.boxes[r][c];
+            if (b) {
+              const [x0,y0]=this.dotPos(r,c), [x1,y1]=this.dotPos(r,c+1), [x2,y2]=this.dotPos(r+1,c+1), [x3,y3]=this.dotPos(r+1,c);
+              svg.appendChild(mk('polygon', { points:`${x0},${y0} ${x1},${y1} ${x2},${y2} ${x3},${y3}`,
+                fill: b==='p1'?'rgba(239,68,68,0.3)':'rgba(251,191,36,0.3)', stroke:'none' }));
+            }
+          }
+        }
+      }
+
+      // ── Line renderer ──
+      const addLine = (x1, y1, x2, y2, key, isBorder) => {
+        const owner = isBorder ? null : this.lineOwner[key];
+        const drawn = isBorder || !!owner;
+        const stroke = isBorder ? '#475569' : (owner ? this.color(owner) : '#0f1d2e');
+        const vis = mk('line', { x1, y1, x2, y2, stroke, 'stroke-width': drawn ? 3.5 : 2.5, 'stroke-linecap':'round' });
+        svg.appendChild(vis);
+        if (!drawn && !this.done) {
+          const hit = mk('line', { x1, y1, x2, y2, stroke:'transparent', 'stroke-width':20, 'stroke-linecap':'round' });
+          hit.style.cursor = 'pointer';
+          hit.addEventListener('click', () => this.handleLine(key));
+          hit.addEventListener('mouseenter', () => vis.setAttribute('stroke', '#334155'));
+          hit.addEventListener('mouseleave', () => vis.setAttribute('stroke', '#0f1d2e'));
+          svg.appendChild(hit);
+        }
+      };
+
+      // ── Lines ──
+      if (isTri) {
+        // horizontal rows 1..n-1 (row n is border)
+        for (let row = 1; row < n; row++)
+          for (let j = 0; j < row; j++) {
+            const [ax,ay]=this.dotPos(row,j), [bx,by]=this.dotPos(row,j+1);
+            addLine(ax,ay,bx,by, `h,${row},${j}`, false);
+          }
+        // bottom border
+        for (let j = 0; j < n; j++) {
+          const [ax,ay]=this.dotPos(n,j), [bx,by]=this.dotPos(n,j+1);
+          addLine(ax,ay,bx,by, null, true);
+        }
+        for (let l = 0; l < n; l++) {
+          for (let j = 0; j <= l; j++) {
+            const [ax,ay]=this.dotPos(l,j);
+            // dl[l][j]: border if j===0
+            const [dlx,dly] = this.dotPos(l+1,j);
+            addLine(ax,ay,dlx,dly, `dl,${l},${j}`, j===0);
+            // dr[l][j]: border if j===l
+            const [drx,dry] = this.dotPos(l+1,j+1);
+            addLine(ax,ay,drx,dry, `dr,${l},${j}`, j===l);
+          }
+        }
+      } else {
+        // horizontal lines h[r][c]: border if r===0 || r===n
+        for (let r = 0; r <= n; r++)
+          for (let c = 0; c < n; c++) {
+            const [ax,ay]=this.dotPos(r,c), [bx,by]=this.dotPos(r,c+1);
+            addLine(ax,ay,bx,by, `h,${r},${c}`, r===0||r===n);
+          }
+        // vertical lines v[r][c]: border if c===0 || c===n
+        for (let r = 0; r < n; r++)
+          for (let c = 0; c <= n; c++) {
+            const [ax,ay]=this.dotPos(r,c), [bx,by]=this.dotPos(r+1,c);
+            addLine(ax,ay,bx,by, `v,${r},${c}`, c===0||c===n);
+          }
+      }
+
+      // ── Dots ──
+      if (isTri) {
+        for (let r = 0; r <= n; r++)
+          for (let j = 0; j <= r; j++) {
+            const [x,y] = this.dotPos(r,j);
+            svg.appendChild(mk('circle', { cx:x, cy:y, r:4, fill:'#e2e8f0' }));
+          }
+      } else {
+        for (let r = 0; r <= n; r++)
+          for (let c = 0; c <= n; c++) {
+            const [x,y] = this.dotPos(r,c);
+            svg.appendChild(mk('circle', { cx:x, cy:y, r:4, fill:'#e2e8f0' }));
+          }
+      }
+
+      this.boardEl.appendChild(svg);
+    },
+
+    handleLine(key) {
+      if (this.done) return;
+      const parts = key.split(',');
+      const type = parts[0], a = +parts[1], b = +parts[2];
+      let result;
+      if (this.gridType === 'triangle') {
+        result = dbTriDraw(this.triState, type, a, b, this.player);
+        if (!result) return;
+        this.triState = result.newState;
+      } else {
+        result = dbDraw(this.state, this.size, type === 'h', a, b, this.player);
+        if (!result) return;
+        this.state = result.newState;
+      }
+      this.lineOwner[key] = this.player;
+      this.afterMove(result.scored);
+    },
+
+    afterMove(scored) {
+      const isTri = this.gridType === 'triangle';
+      const score = isTri ? dbTriScore(this.triState) : dbScore(this.state.boxes);
+      const complete = isTri ? dbTriIsComplete(this.triState) : dbIsComplete(this.state);
+
+      const scoreText = `Red ${score.p1} – ${score.p2} Yellow`;
+      this.scoreEl.textContent = scoreText;
+
+      if (complete) {
+        this.done = true;
+        if (score.p1 > score.p2) {
+          showWinOverlay(`Red wins!  ${score.p1}–${score.p2}`, '#ef4444', () => this.reset());
+        } else if (score.p2 > score.p1) {
+          showWinOverlay(`Yellow wins!  ${score.p2}–${score.p1}`, '#fbbf24', () => this.reset());
+        } else {
+          this.statusEl.textContent = `Draw!  ${score.p1}–${score.p1}`;
+          this.statusEl.classList.add('win');
+          this.renderSVG();
+          return;
+        }
+      } else if (scored > 0) {
+        this.statusEl.textContent = `${this.label(this.player)}'s turn again (+${scored})`;
+      } else {
+        this.player = this.player === 'p1' ? 'p2' : 'p1';
+        this.statusEl.textContent = `${this.label(this.player)}'s turn`;
+      }
+      this.renderSVG();
+    },
+  };
+
   // ── Navigation ──
   document.body.addEventListener('click', e => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
     const action = target.dataset.action;
-    if      (action === 'menu')          { hideWinOverlay(); showScreen('menu'); }
-    else if (action === 'play-again')    { const cb = playAgainCallback; hideWinOverlay(); if (cb) cb(); }
-    else if (action === 'go-ttt-detail') showScreen('ttt-detail');
-    else if (action === 'go-c4-detail')  showScreen('c4-detail');
-    else if (action === 'go-c4-config')  showScreen('c4-config');
-    else if (action === 'ttt-start')     { ttt.reset(); showScreen('ttt'); }
-    else if (action === 'ttt-reset')     ttt.reset();
-    else if (action === 'c4-start')      { c4.start(parseInt(target.dataset.size, 10)); showScreen('c4'); }
-    else if (action === 'c4-reset')      c4.reset();
+    if      (action === 'menu')           { hideWinOverlay(); showScreen('menu'); }
+    else if (action === 'play-again')     { const cb = playAgainCallback; hideWinOverlay(); if (cb) cb(); }
+    else if (action === 'go-ttt-detail')  showScreen('ttt-detail');
+    else if (action === 'go-c4-detail')   showScreen('c4-detail');
+    else if (action === 'go-c4-config')   showScreen('c4-config');
+    else if (action === 'go-db-detail')   showScreen('db-detail');
+    else if (action === 'go-db-config')   showScreen('db-config');
+    else if (action === 'ttt-start')      { ttt.reset(); showScreen('ttt'); }
+    else if (action === 'ttt-reset')      ttt.reset();
+    else if (action === 'c4-start')       { c4.start(parseInt(target.dataset.size, 10)); showScreen('c4'); }
+    else if (action === 'c4-reset')       c4.reset();
+    else if (action === 'db-type')        { dbPendingType = target.dataset.type; showScreen('db-size'); }
+    else if (action === 'db-start')       { db.start(dbPendingType, parseInt(target.dataset.size, 10)); showScreen('db'); }
+    else if (action === 'db-reset')       db.reset();
   });
 </script>
 </body>
